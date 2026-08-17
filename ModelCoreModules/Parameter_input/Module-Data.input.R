@@ -2,7 +2,7 @@
 ## DATA INPUT
 ## 1. directly load in fixed parameters (1-dim and multi-dim) and calibrated free parameters
 ## 2. CAE parameters
-## Update: Oct 2022
+## Update: August 2026
 ###########################################################################################
 
 ## Read in data from excel file ##
@@ -22,7 +22,6 @@ vparameters <- vlist # initialize vparameters - parameter list used in model
 source("ModelCoreModules/Parameter_input/Par_fix.R")
 # read in initial population
 source("ModelCoreModules/Parameter_input/Par_pop.R")
-#browser()
 # read in calibrated free parameters
 source("ModelCoreModules/Parameter_input/Par_cali.R")
 

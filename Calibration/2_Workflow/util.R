@@ -294,7 +294,7 @@ run_model_with_sample <- function(randsp, calpar.info, vparameters, vlist, calib
 	output_ll <- rep(NA, nrow(randsp))
 	output_model <- matrix(nrow = nrow(randsp), ncol = num_targets)
 	output_obs <- matrix(nrow = nrow(randsp), ncol = num_targets)
-	output_outa <- array(NA, dim = c(nrow(randsp), 348, 28, 30))
+	output_outa <- array(NA, dim = c(nrow(randsp), 348, 24, 30))
 	if(verbal){
 		pb <- progress_bar$new(format = "  Running ODE [:bar] :percent, eta: :eta",
 													 total = nrow(randsp))

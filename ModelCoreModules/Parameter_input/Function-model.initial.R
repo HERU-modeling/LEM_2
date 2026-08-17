@@ -1,10 +1,9 @@
 ## function used to generate the initial population for all groups at different states 
-## output: a 42 * 19 matrix, initial population for 42 groups at 19 different states
+## output: a 30 * 16 matrix, initial population for 30 groups at 16 different states
 
 model.initial = function(par, diag18, gp.gn){
   with(as.list(c(par, diag18 = diag18, gp.gn)), {
     # diag18: # of hiv diagnosed in 18 groups, 
-  	# created by "targetNYC.R", from NYC surveillance reports
 
     # population in 18 groups, stratified by gender, ethnicity, and risk ("pop")
     pop.total  = pop.male + pop.female
@@ -12,24 +11,15 @@ model.initial = function(par, diag18, gp.gn){
     pop.pwid.f = pop.total *prop.pwid.among.total *(1-prop.male.among.pwid)
     pop.pwid.m = pop.total *prop.pwid.among.total *prop.male.among.pwid
   
-    # # midu -> mwid
-    # pop.mwidP  = pop.pwid.m * prop.mpwid.among.pwid # MSM/PWID from M/PWID
-    # pop.mwidM  = pop.msm    * prop.mpwid.among.msm # MSM/PWID from MSM
-    # pop.mwid   = (pop.mwidP + pop.mwidM) / 2  # MSM/PWID average of 2 above
-    # midu -> mwid, Azzam removed the averaging method, only using mpwid from male pwid
-    pop.mwidP = pop.pwid.m * prop.mpwid.among.pwid
-    pop.mwid = pop.mwidP
-    
-    
+    pop.mwid = pop.pwid.m * prop.mpwid.among.pwid
+
     pop.pwid.m = pop.pwid.m - pop.mwid #PWID
     pop.msm    = pop.msm    - pop.mwid
     
     pop.het.m  = pop.male   - pop.msm - pop.pwid.m - pop.mwid
     pop.het.f  = pop.female - pop.pwid.f
     pop        = round(c(pop.msm, pop.mwid, pop.pwid.m, pop.pwid.f, pop.het.m, pop.het.f))
-#browser()  
-#    if (any(prop.curr.art <= viral_sup)) {warning(paste0("prop.curr.art <= viral_sup detected; values adjusted in ", CITY))}
-#    if (any(prop.ever.art <= prop.curr.art)) {warning(paste0("prop.ever.art <= prop.curr.art detected", CITY))}
+
     
     # Ensure prop.curr.art>viral_sup
     for (i in seq_len(length(prop.curr.art))) {
@@ -49,11 +39,10 @@ model.initial = function(par, diag18, gp.gn){
     } 
     
     # infected but not diag 
-    # D/(I+D)=prop.HIV.aware => I=(D-prop*D)/prop
-    I18 = (diag18 - prop.HIV.aware *diag18) /prop.HIV.aware # increase prop.aware will decrease no. of I18
-#browser()    
+    I18 = (diag18 - prop.HIV.aware *diag18) /prop.HIV.aware 
+   
 ############
-#Re-adjust I18 based on ndiag target, Should not impact Prevalence since we don't touch diag 18     
+#Re-adjust I18 based on ndiag target   
     #Level 1: msm, het,pwid prop among ndiag
     ndiag.msm.prop <- sum(calib.target$ndiag.obs[1,c("Young","Old")])/sum(calib.target$ndiag.obs[1,c("W","B","H")])
     ndiag.het.prop <- sum(calib.target$ndiag.obs[1,c("M.HET","F.HET")])/sum(calib.target$ndiag.obs[1,c("W","B","H")])
@@ -70,7 +59,7 @@ model.initial = function(par, diag18, gp.gn){
     ndiag.B.prop <- sum(calib.target$ndiag.obs[1,c("B")])/sum(calib.target$ndiag.obs[1,c("W","B","H")])
     ndiag.H.prop <- sum(calib.target$ndiag.obs[1,c("H")])/sum(calib.target$ndiag.obs[1,c("W","B","H")])
     
-#COmbine, prop for I18
+#Combine, prop for I18
     ndiag.W.Y.msm.prop <- ndiag.W.prop * ndiag.Y.msm.prop * ndiag.msm.prop
     ndiag.B.Y.msm.prop <- ndiag.B.prop * ndiag.Y.msm.prop * ndiag.msm.prop
     ndiag.H.Y.msm.prop <- ndiag.H.prop * ndiag.Y.msm.prop * ndiag.msm.prop #Sum these 3 = ndiag.Y.msm.prop * ndiag.msm.prop
@@ -118,7 +107,7 @@ model.initial = function(par, diag18, gp.gn){
     prop.young.I[msm.gn$Y.w]   <- ndiag.Y.msm.prop
     prop.young.I[msm.gn$Y.b]   <- ndiag.Y.msm.prop
     prop.young.I[msm.gn$Y.h]   <- ndiag.Y.msm.prop
-#browser()    
+    
  ############    
     
     # susceptible
@@ -134,8 +123,6 @@ model.initial = function(par, diag18, gp.gn){
     O18 = T.ever18 - T18
     # diagnosed but not on ART
     D18 = diag18 - T18 - O18
- # browser()   
- #  init18            = cbind(S18, I18, D18, T18, O18)
     init18            = cbind(S18, I18, D18, T18_12,T18_3, O18)
     row.names(init18) = names18
    
@@ -147,7 +134,7 @@ model.initial = function(par, diag18, gp.gn){
 # Check diag.B: 		 sum(init18[gp18.gn$black ,c("D18","T18_12","T18_3","O18")])
 # Check diag.H: 		 sum(init18[gp18.gn$hisp  ,c("D18","T18_12","T18_3","O18")]) 
 
-    # Temporary Fix - Check for negative value, turn it positive
+    # Check for negative value, turn it positive
     for (i in seq_len(nrow(init18))) {
     	for (j in seq_len(ncol(init18))) {
     		if (init18[i, j] < 0) {
@@ -157,18 +144,14 @@ model.initial = function(par, diag18, gp.gn){
     		}
     	}
     }
-#browser()    
-#    if (any(init18< 0)) {warning(paste0("Negative in init18 ", CITY))}   
+ 
 
     n.gp  = length(names.gp)
-    # change n.gp group names without OAT, low, high
     rname = gsub(paste(c("/low", "/high", "/old", "/young"), collapse="|"), "", names.gp)
 
     #init has n.gp in row, populated with same n if same rname
-#   init  = matrix(0, n.gp, 5) 
     init  = matrix(0, n.gp, 6) 
     row.names(init) = names.gp
-#   colnames(init)  = c("S", "I", "D", "T", "O")
     colnames(init)  = c("S", "I", "D", "T12", "T3", "O")
     prop.high.sus.all =numeric(n.gp)
     prop.high.inf.all =numeric(n.gp)
@@ -194,16 +177,12 @@ model.initial = function(par, diag18, gp.gn){
      init[low,"S"]                    = init[low, "S"]  *(1 - as.numeric(prop.high.sus.all[high]))
      init[old,"S"]                    = init[old, "S"]  *(1 - as.numeric(prop.young.sus.all[young]))
 
-#     init[high , c("I","D","T","O")]  = init[high , c("I","D","T","O")] *as.numeric(prop.high.inf.all[high])
-#     init[young, c("I","D","T","O")]  = init[young, c("I","D","T","O")] *as.numeric(prop.young.inf.all[young])
      init[high , c("I", "D", "T12", "T3", "O")]  = init[high , c("I", "D", "T12", "T3", "O")] *as.numeric(prop.high.inf.all[high])
      init[young, c("I", "D", "T12", "T3", "O")]  = init[young, c("I", "D", "T12", "T3", "O")] *as.numeric(prop.young.inf.all[young])
      
-#     init[low , c("I","D","T","O")]   = init[low,  c("I","D","T","O")] *(1-as.numeric(prop.high.inf.all[high]))
-#     init[old , c("I","D","T","O")]   = init[old,  c("I","D","T","O")] *(1-as.numeric(prop.young.inf.all[young]))
      init[low , c("I", "D", "T12", "T3", "O")]   = init[low,  c("I", "D", "T12", "T3", "O")] *(1-as.numeric(prop.high.inf.all[high]))
      init[old , c("I", "D", "T12", "T3", "O")]   = init[old,  c("I", "D", "T12", "T3", "O")] *(1-as.numeric(prop.young.inf.all[young]))
-#browser() #check init
+
     # Re-distribute number of diagnosed PLHIV young/MSM to Infected young/MSM - Accounted for Lower awareness of HIV among young/MSM
 
       sum.all.msm.I             = (init[young, c("I")] + init[old, c("I")])
@@ -212,8 +191,7 @@ model.initial = function(par, diag18, gp.gn){
 
     S2 = prop.S2 *init[ ,"S"]
     S1 = init[ ,"S"] - S2
-#   I  = init[ ,"I"] *cbind(prop.Ia, prop.I1, prop.I2, prop.I3)    
-# browser()
+
     # Re-do I dist CD4: account for I3.prop = p.ldiag by races, rest keep there prop between them (1-prop.I3)
     race_mult <- numeric(nrow(init))
     race_mult[gp.gn$white] <- calib.target$late_diag.obs[1,"W"]*I3_multi[gp18.gn$white][1]
@@ -224,17 +202,16 @@ model.initial = function(par, diag18, gp.gn){
     I  = cbind(Ia12,I3) #Check: rowSums(I) = init[,"I"], and I3/rowSums(I) = calib.target$late_diag.obs[1,]
     
     D  = init[ ,"D"] *cbind(prop.Da, prop.D1, prop.D2, prop.D3)
-#   T  = init[ ,"T"] *cbind(prop.T1, prop.T2, prop.T3)
     prop.T <- prop.T1/(prop.T1+prop.T2) #New par: Proportion of Prop_T1 among T1+T2, can replace current prop.T, rep(0.6,30)
     T12  = init[ ,"T12"] *cbind(prop.T, (1- prop.T))  
     T3 = init[ ,"T3"]
     O  = init[ ,"O"] *cbind(prop.O1, prop.O2, prop.O3)
 
-#    init2 = cbind(S1, S2, I, D, T, O) 
+
     init2 = cbind(S1, S2, I, D, T12,T3, O) 
     
     colnames(init2) = vparameters$state.name[c(1:16)]
-#browser() 
+
 # Check viral_sup: rowSums(init2[,c("T1","T2")])/rowSums(init2[,c(7:16)]) = calib.target$viral_sup.obs[1,]
 # Check diag.allmsm: sum(init2[gp.gn$all.msm ,c(7:16)]) 
 # Check diag.het.m:  sum(init2[gp.gn$het.m,c(7:16)])

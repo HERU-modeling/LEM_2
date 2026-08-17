@@ -50,7 +50,6 @@ accum.outcomes.combination <- function(input.parameters,
 	for(i in 1:(dim(pop.in)[1])){
 		
 		CurrentPeriod <- pop.in[i, , ]
-#		rownames(CurrentPeriod) <- state.name[-c(17:21)]
 		rownames(CurrentPeriod) <- state.name[c(1:16)]
 		
 		# Only consider evaluation period for accumulating outcomes 2020-2040
@@ -77,27 +76,11 @@ accum.outcomes.combination <- function(input.parameters,
 			# TESTING COST: time-varying testing rates
 
 			## TESTING
-#			if(i<12){
-#				psi = psi.m[1, ]
-#			} else if (i<24) {
-#				psi = psi.m[2, ]
-#			} else if (i<36) {
-#				psi = psi.m[3, ]
-#			} else if (i>=36) {
-#				psi = psi.m[4, ]
-#			}
-			if (i <= 12) psi.t <- psi.m[1, ]
-			if (i > 12 & i <= 24) psi.t <- psi.m[2, ]
-			if (i > 24 & i <= 36) psi.t <- psi.m[3, ]
-			if (i > 36) psi.t <- psi.m[4, ]
+			if (i <= 12) psi.t <- psi.m[1, ]          # Jan 2017 - Dec 2017 
+			if (i > 12 & i <= 24) psi.t <- psi.m[2, ] # Jan 2018 - Dec 2018 
+			if (i > 24 & i <= 36) psi.t <- psi.m[3, ] # Jan 2019 - Dec 2019 
+			if (i > 36) psi.t <- psi.m[4, ]           # Dec 2020 onward
 				
-#			psi.matrix <- matrix(0, nrow = 30, ncol = 16)
-#			colnames(psi.matrix) <- state.name[-c(17:21)]
-#			psi.matrix[ , c("S1", "Ia", "I1")] <- psi
-#			psi.matrix[ , "I2"] <- psi + v2
-#			psi.matrix[ , "I3"] <- psi + v3
-#			psi.matrix <- t(psi.matrix)
-			
 			psi <- matrix(0, nrow = 30, ncol = 16)
 			colnames(psi) <- vparameters$state.name[1:16]		
 			psi[ , c("S1", "Ia", "I1", "I2", "I3")] <- psi.t	
@@ -136,13 +119,6 @@ accum.outcomes.combination <- function(input.parameters,
 
 						int.test.eff <- scale.m.temp * (scale.up.v - 1) + 1
 						
-#						psi.matrix.temp <- matrix(0, nrow = 30, ncol = 16)
-#						colnames(psi.matrix.temp) <- state.name[-c(17:21)]
-#						psi.matrix.temp[ , c("S1", "Ia", "I1", "I2", "I3")] <- psi
-#						psi.matrix.temp <- t(psi.matrix.temp)
-#						psi.matrix.temp <- psi.matrix.temp * int.test.eff[(i - int.start), ]
-#						psi.matrix.temp["I2", ] <- psi.matrix.temp["I2", ] + v2
-#						psi.matrix.temp["I3", ] <- psi.matrix.temp["I3", ] + v3
 						psi.temp <- matrix(0, nrow = 30, ncol = 16)
 						colnames(psi.temp) <- vparameters$state.name[1:16]						
 						psi.temp[ , c("S1", "Ia", "I1", "I2", "I3")] <- psi.t

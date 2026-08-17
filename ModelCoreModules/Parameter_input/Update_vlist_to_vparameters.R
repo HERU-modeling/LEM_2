@@ -18,10 +18,8 @@ par_fix <- function(vparameters, vlist){
 	# non-city-scpecific parameters
 	for (i in non_city_sp) {
       name <- par_info$parameter[i]
-#browser()		
 		if (par_info[i, ]$dimension == 1) {
 			vparameters[[name]] <- vlist[[name]]$pe
-#browser()				
 		}
 	}
 
@@ -37,13 +35,12 @@ par_fix <- function(vparameters, vlist){
 	vparameters$state.name <- c(
 		"S1", "S2", "Ia", "I1", "I2", "I3",
 		"Da", "D1", "D2", "D3", "T1", "T2", "T3", "O1", "O2", "O3",
-		"inc_bo", "inc_bs", "inc_g", "diag", "diag_late", "positive_test", "viral_sup", "death",
-		"D_T","I_T","I_D","death_D"
+		"inc_bo", "inc_bs", "inc_g", "diag", "diag_late", "positive_test", "viral_sup", "death"
 	)
 	# names for the 16 health states plus 5 states (incidence opposite sex, same sex, needle sharing, diagnose, death)
 	
-	#browser() #check vparameters$names.gp & names.msm
-	# return indices for the subgroups we are interested among all 42 groups
+
+	# return indices for the subgroups we are interested among all groups
 	source("ModelCoreModules/Parameter_input/Group.number.R")
 	
 	## Parametrization for parameters with multiple dimensions
@@ -66,19 +63,7 @@ par_fix <- function(vparameters, vlist){
 	
 	# nsG: 6 to 12, number of sexual partners msm: assume mwid = msm 
 	vparameters$nsG <- numeric(length(vparameters$names.msm))
-	#browser()
-	#vparameters$nsG[intersect(msm.gn$O.w  , msm.gn$msm)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "w" & risk == "msm"]) 
-	#vparameters$nsG[intersect(msm.gn$O.b  , msm.gn$msm)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "b" & risk == "msm"]) 
-	#vparameters$nsG[intersect(msm.gn$O.h  , msm.gn$msm)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "h" & risk == "msm"]) 
-	#vparameters$nsG[intersect(msm.gn$Y.w  , msm.gn$msm)] <- with(vlist$nsG, pe[sex.risk.age.group == "young" & ethnicity == "w" & risk == "msm"]) 
-	#vparameters$nsG[intersect(msm.gn$Y.b  , msm.gn$msm)] <- with(vlist$nsG, pe[sex.risk.age.group == "young" & ethnicity == "b" & risk == "msm"]) 
-	#vparameters$nsG[intersect(msm.gn$Y.h  , msm.gn$msm)] <- with(vlist$nsG, pe[sex.risk.age.group == "young" & ethnicity == "h" & risk == "msm"]) 
-	#vparameters$nsG[intersect(msm.gn$O.w  , msm.gn$mwid)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "w" & risk == "mwid"]) 
-	#vparameters$nsG[intersect(msm.gn$O.b  , msm.gn$mwid)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "b" & risk == "mwid"]) 
-	#vparameters$nsG[intersect(msm.gn$O.h  , msm.gn$mwid)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "h" & risk == "mwid"]) 
-	#vparameters$nsG[intersect(msm.gn$Y.w  , msm.gn$mwid)] <- with(vlist$nsG, pe[sex.risk.age.group == "young" & ethnicity == "w" & risk == "mwid"]) 
-	#vparameters$nsG[intersect(msm.gn$Y.b  , msm.gn$mwid)] <- with(vlist$nsG, pe[sex.risk.age.group == "young" & ethnicity == "b" & risk == "mwid"]) 
-	#vparameters$nsG[intersect(msm.gn$Y.h  , msm.gn$mwid)] <- with(vlist$nsG, pe[sex.risk.age.group == "young" & ethnicity == "h" & risk == "mwid"]) 
+
 	vparameters$nsG[intersect(msm.gn$old  , msm.gn$white)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "w"]) 
 	vparameters$nsG[intersect(msm.gn$old  , msm.gn$black)] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "b"]) 
 	vparameters$nsG[intersect(msm.gn$old  , msm.gn$hisp )] <- with(vlist$nsG, pe[sex.risk.age.group == "old" & ethnicity == "h"]) 
@@ -88,7 +73,6 @@ par_fix <- function(vparameters, vlist){
 
 	# uis: 6 to 12, probability of condom use msm: Before mwid = msm 
 	vparameters$uis <- numeric(length(vparameters$names.msm))
-	#vparameters$uis <- rep(vlist$uis2$pe, length(vparameters$names.msm))
 	vparameters$uis[msm.gn$old  ] <- with(vlist$uis, pe[sex.risk.age.group == "old"]) 
 	vparameters$uis[msm.gn$young] <- with(vlist$uis, pe[sex.risk.age.group == "young"]) 
 
@@ -96,8 +80,7 @@ par_fix <- function(vparameters, vlist){
 	vparameters$prop.young.I <- numeric(length(vparameters$names.msm))
 	vparameters$prop.young.I[intersect(msm.gn$young, msm.gn$msm)]  <- with(vlist$prop.young.I, pe[sex.risk.age.group == "young" & risk == "msm"]) 
 	vparameters$prop.young.I[intersect(msm.gn$young, msm.gn$mwid)] <- with(vlist$prop.young.I, pe[sex.risk.age.group == "young" & risk == "mwid"])
-	
-	#browser() #Check msm.gn
+
 	
 	## Parameter in pop18 (race*gender*risk group) domain ##
 	gp18.gn <- gp18.gn.fun(vparameters$names18)
@@ -113,21 +96,12 @@ par_fix <- function(vparameters, vlist){
 	
 	# T1_O: 12 to 18, m=f for pwid, het (ART dropout rate CD4 >= 500)
 	vparameters$T1_O <- numeric(length(vparameters$names18))
-	#vparameters$T1_O[intersect(gp18.gn$pwid, gp18.gn$male)] <- with(vlist$T1_O, pe[risk == "pwid" & gender == "m"])
-	#vparameters$T1_O[intersect(gp18.gn$pwid, gp18.gn$female)] <- with(vlist$T1_O, pe[risk == "pwid" & gender == "f"])
-	#vparameters$T1_O[gp18.gn$msm] <- with(vlist$T1_O, pe[risk == "msm"])
-	#vparameters$T1_O[gp18.gn$mwid] <- with(vlist$T1_O, pe[risk == "mwid"])
-	#vparameters$T1_O[gp18.gn$het.f] <- with(vlist$T1_O, pe[risk == "het" & gender == "f"])
-	#vparameters$T1_O[gp18.gn$het.m] <- with(vlist$T1_O, pe[risk == "het" & gender == "m"])
 	vparameters$T1_O[gp18.gn$white] <- with(vlist$T1_O, pe[ethnicity == "w"])
 	vparameters$T1_O[gp18.gn$black] <- with(vlist$T1_O, pe[ethnicity == "b"])
 	vparameters$T1_O[gp18.gn$hisp]  <- with(vlist$T1_O, pe[ethnicity == "h"])
 	
 	# T2_O: 12 to 18, m=f for pwid, het (ART dropout rate CD4:200-499)
 	vparameters$T2_O <- numeric(length(vparameters$names18))
-	#vparameters$T2_O[gp18.gn$white] <- with(vlist$T2_O, pe[ethnicity == "w"])
-	#vparameters$T2_O[gp18.gn$black] <- with(vlist$T2_O, pe[ethnicity == "b"])
-	#vparameters$T2_O[gp18.gn$hisp]  <- with(vlist$T2_O, pe[ethnicity == "h"])
 	vparameters$T2_O <- vparameters$T1_O * vparameters$T12_O
 	for (i in seq_len(length(vparameters$T2_O))) {
 		if (vparameters$T2_O[i] < 0) {
@@ -228,12 +202,6 @@ par_fix <- function(vparameters, vlist){
 	
 	# O_T: 12 to 18, m=f for pwid, het (ART re-initiation)
 	vparameters$O_T <- numeric(length(vparameters$names18))
-	#vparameters$O_T[intersect(gp18.gn$pwid, gp18.gn$male)] <- with(vlist$O_T, pe[risk == "pwid" & gender == "m"])
-	#vparameters$O_T[intersect(gp18.gn$pwid, gp18.gn$female)] <- with(vlist$O_T, pe[risk == "pwid" & gender == "f"])
-	#vparameters$O_T[gp18.gn$msm] <- with(vlist$O_T, pe[risk == "msm"])
-	#vparameters$O_T[gp18.gn$mwid] <- with(vlist$O_T, pe[risk == "mwid"])
-	#vparameters$O_T[gp18.gn$het.f] <- with(vlist$O_T, pe[risk == "het" & gender == "f"])
-	#vparameters$O_T[gp18.gn$het.m] <- with(vlist$O_T, pe[risk == "het" & gender == "m"])
 	vparameters$O_T[gp18.gn$white] <- with(vlist$O_T, pe[ethnicity == "w"])
 	vparameters$O_T[gp18.gn$black] <- with(vlist$O_T, pe[ethnicity == "b"])
 	vparameters$O_T[gp18.gn$hisp]  <- with(vlist$O_T, pe[ethnicity == "h"])
@@ -270,20 +238,12 @@ par_fix <- function(vparameters, vlist){
 	alpha3_ <- numeric(length(vparameters$names18))
 	
 	# Populate phi1_
-	#phi1_[gp18.gn$msm]   <- with(vlist$phi1_, pe[risk == "msm"])
-	#phi1_[gp18.gn$het.m] <- with(vlist$phi1_, pe[risk == "het" & gender == "m"])
-	#phi1_[gp18.gn$het.f] <- with(vlist$phi1_, pe[risk == "het" & gender == "f"])
-	#phi1_[gp18.gn$pwid]  <- with(vlist$phi1_, pe[risk == "pwid"])
-	#phi1_[gp18.gn$mwid]  <- with(vlist$phi1_, pe[risk == "mwid"])
 	phi1_[gp18.gn$white]   <- with(vlist$phi1_, pe[ethnicity == "w"])
 	phi1_[gp18.gn$black]   <- with(vlist$phi1_, pe[ethnicity == "b"])
 	phi1_[gp18.gn$hisp]    <- with(vlist$phi1_, pe[ethnicity == "h"])
 	
 	
 	# Populate phi2_
-	#phi2_[gp18.gn$white]   <- with(vlist$phi2_, pe[ethnicity == "w"])
-	#phi2_[gp18.gn$black]   <- with(vlist$phi2_, pe[ethnicity == "b"])
-	#phi2_[gp18.gn$hisp]    <- with(vlist$phi2_, pe[ethnicity == "h"])
 	phi2_                  <- phi1_ * vparameters$phi12
 	for (i in seq_len(length(phi2_))) {
 		if (phi2_[i] < 0) {
@@ -302,9 +262,6 @@ par_fix <- function(vparameters, vlist){
 	}
 	
 	# Populate phi3_
-	#phi3_[gp18.gn$white]   <- with(vlist$phi3_, pe[ethnicity == "w"])
-	#phi3_[gp18.gn$black]   <- with(vlist$phi3_, pe[ethnicity == "b"])
-	#phi3_[gp18.gn$hisp]    <- with(vlist$phi3_, pe[ethnicity == "h"])
 	phi3_                  <- phi1_ * vparameters$phi13
 	for (i in seq_len(length(phi3_))) {
 		if (phi3_[i] < 0) {
@@ -319,59 +276,26 @@ par_fix <- function(vparameters, vlist){
 				"phi3_ = ", phi3_[i],	" > 1 in ", CITY,
 				" for ", vparameters$names18[i],". Setting it to 0.95."))
 			phi3_[i] <- 0.95
-#browser()			
 		}
 	}
 	
 	# Populate p1
-	#p1[intersect(gp18.gn$pwid, gp18.gn$male)]         <- with(vlist$p1, pe[risk == "pwid" & gender == "m" & year == "2017"])
-	#p1[intersect(gp18.gn$pwid, gp18.gn$female)]       <- with(vlist$p1, pe[risk == "pwid" & gender == "f" & year == "2017"])
-	#p1[gp18.gn$het.m]                                 <- with(vlist$p1, pe[risk == "het"  & gender == "m" & year == "2017"])
-	#p1[gp18.gn$het.f]                                 <- with(vlist$p1, pe[risk == "het"  & gender == "f" & year == "2017"])
-	#p1[gp18.gn$msm]                                   <- with(vlist$p1, pe[risk == "msm"  & year == "2017"])
-	#p1[gp18.gn$mwid]                                  <- with(vlist$p1, pe[risk == "mwid" & year == "2017"])
 	p1[gp18.gn$white]                                  <- with(vlist$p1, pe[ethnicity == "w" & year == "2017"])
 	p1[gp18.gn$black]                                  <- with(vlist$p1, pe[ethnicity == "b" & year == "2017"])
 	p1[gp18.gn$hisp ]                                  <- with(vlist$p1, pe[ethnicity == "h" & year == "2017"])
 	
 	p1.update        <- p1 # Original data
-	#p1.update[intersect(gp18.gn$pwid, gp18.gn$male)]  <- with(vlist$p1, pe[risk == "pwid" & gender == "m" & year == "2022"])
-	#p1.update[intersect(gp18.gn$pwid, gp18.gn$female)]<- with(vlist$p1, pe[risk == "pwid" & gender == "f" & year == "2022"])
-	#p1.update[gp18.gn$het.m]                          <- with(vlist$p1, pe[risk == "het"  & gender == "m" & year == "2022"])
-	#p1.update[gp18.gn$het.f]                          <- with(vlist$p1, pe[risk == "het"  & gender == "f" & year == "2022"])
-	#p1.update[gp18.gn$msm]                            <- with(vlist$p1, pe[risk == "msm"  & year == "2022"])
-	#p1.update[gp18.gn$mwid]                           <- with(vlist$p1, pe[risk == "mwid" & year == "2022"])
 	p1.update[gp18.gn$white]                           <- with(vlist$p1, pe[ethnicity == "w" & year == "2022"])
 	p1.update[gp18.gn$black]                           <- with(vlist$p1, pe[ethnicity == "b" & year == "2022"])
 	p1.update[gp18.gn$hisp ]                           <- with(vlist$p1, pe[ethnicity == "h" & year == "2022"])
 	
 	# Populate alpha1_
-	
-	#alpha1_[intersect(gp18.gn$msm,gp18.gn$white)] <- with(vlist$alpha1_, pe[ethnicity == "w" & risk == "msm"]) 
-	#alpha1_[intersect(gp18.gn$msm,gp18.gn$black)] <- with(vlist$alpha1_, pe[ethnicity == "b" & risk == "msm"])
-	#alpha1_[intersect(gp18.gn$msm,gp18.gn$hisp)]  <- with(vlist$alpha1_, pe[ethnicity == "h" & risk == "msm"])
-	#alpha1_[intersect(gp18.gn$mwid,gp18.gn$white)] <- with(vlist$alpha1_, pe[ethnicity == "w" & risk == "mwid"]) 
-	#alpha1_[intersect(gp18.gn$mwid,gp18.gn$black)] <- with(vlist$alpha1_, pe[ethnicity == "b" & risk == "mwid"])
-	#alpha1_[intersect(gp18.gn$mwid,gp18.gn$hisp)]  <- with(vlist$alpha1_, pe[ethnicity == "h" & risk == "mwid"])
-	#alpha1_[intersect(gp18.gn$pwid,gp18.gn$white)] <- with(vlist$alpha1_, pe[ethnicity == "w" & risk == "pwid"]) 
-	#alpha1_[intersect(gp18.gn$pwid,gp18.gn$black)] <- with(vlist$alpha1_, pe[ethnicity == "b" & risk == "pwid"])
-	#alpha1_[intersect(gp18.gn$pwid,gp18.gn$hisp)]  <- with(vlist$alpha1_, pe[ethnicity == "h" & risk == "pwid"])
-	#alpha1_[intersect(gp18.gn$het.m,gp18.gn$white)] <- with(vlist$alpha1_, pe[gender == "m" & ethnicity == "w" & risk == "het"])
-	#alpha1_[intersect(gp18.gn$het.m,gp18.gn$black)] <- with(vlist$alpha1_, pe[gender == "m" & ethnicity == "b" & risk == "het"])
-	#alpha1_[intersect(gp18.gn$het.m,gp18.gn$hisp)]  <- with(vlist$alpha1_, pe[gender == "m" & ethnicity == "h" & risk == "het"])
-	#alpha1_[intersect(gp18.gn$het.f,gp18.gn$white)] <- with(vlist$alpha1_, pe[gender == "f" & ethnicity == "w" & risk == "het"])
-	#alpha1_[intersect(gp18.gn$het.f,gp18.gn$black)] <- with(vlist$alpha1_, pe[gender == "f" & ethnicity == "b" & risk == "het"])
-	#alpha1_[intersect(gp18.gn$het.f,gp18.gn$hisp)]  <- with(vlist$alpha1_, pe[gender == "f" & ethnicity == "h" & risk == "het"])
-	#browser()
 	alpha1_[gp18.gn$white] <- with(vlist$alpha1_, pe[ethnicity == "w"])
 	alpha1_[gp18.gn$black] <- with(vlist$alpha1_, pe[ethnicity == "b"])
 	alpha1_[gp18.gn$hisp]  <- with(vlist$alpha1_, pe[ethnicity == "h"])
 
 	
 	# Populate alpha2_
-	#alpha2_[gp18.gn$white] <- with(vlist$alpha2_, pe[ethnicity == "w"])
-	#alpha2_[gp18.gn$black] <- with(vlist$alpha2_, pe[ethnicity == "b"])
-	#alpha2_[gp18.gn$hisp]  <- with(vlist$alpha2_, pe[ethnicity == "h"])
 	alpha2_                 <- alpha1_ * vparameters$alpha12
 	for (i in seq_len(length(alpha2_))) {
 		if (alpha2_[i] < 0) {
@@ -390,9 +314,6 @@ par_fix <- function(vparameters, vlist){
 	}
 	
 	# Populate alpha3_
-	#alpha3_[gp18.gn$white] <- with(vlist$alpha3_, pe[ethnicity == "w"])
-	#alpha3_[gp18.gn$black] <- with(vlist$alpha3_, pe[ethnicity == "b"])
-	#alpha3_[gp18.gn$hisp]  <- with(vlist$alpha3_, pe[ethnicity == "h"])
 	alpha3_                 <- alpha1_ * vparameters$alpha13
 	for (i in seq_len(length(alpha3_))) {
 		if (alpha3_[i] < 0) {
@@ -409,7 +330,7 @@ par_fix <- function(vparameters, vlist){
 			alpha3_[i] <- 0.95
 		}
 	}
-	#browser()
+
 	# Generate first p1 yr data vector
 	phi1 <- phi1_ * p1
 	phi2 <- phi2_ * p1
@@ -452,18 +373,6 @@ par_fix <- function(vparameters, vlist){
 	
 	# prop.HIV.aware: 6 to 18, % aware of HIV status
 	vparameters$prop.HIV.aware <- numeric(length(vparameters$names18))
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$all.msm,gp18.gn$white)] <- with(vlist$prop.HIV.aware, pe[ethnicity == "w" & risk == "msm"]) # include MWID
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$all.msm,gp18.gn$black)] <- with(vlist$prop.HIV.aware, pe[ethnicity == "b" & risk == "msm"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$all.msm,gp18.gn$hisp)] <- with(vlist$prop.HIV.aware, pe[ethnicity == "h" & risk == "msm"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$pwid,gp18.gn$white)] <- with(vlist$prop.HIV.aware, pe[ethnicity == "w" & risk == "pwid"]) 
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$pwid,gp18.gn$black)] <- with(vlist$prop.HIV.aware, pe[ethnicity == "b" & risk == "pwid"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$pwid,gp18.gn$hisp)] <- with(vlist$prop.HIV.aware, pe[ethnicity == "h" & risk == "pwid"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$het.m,gp18.gn$white)] <- with(vlist$prop.HIV.aware, pe[gender == "m" & ethnicity == "w" & risk == "het"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$het.m,gp18.gn$black)] <- with(vlist$prop.HIV.aware, pe[gender == "m" & ethnicity == "b" & risk == "het"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$het.m,gp18.gn$hisp)] <- with(vlist$prop.HIV.aware, pe[gender == "m" & ethnicity == "h" & risk == "het"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$het.f,gp18.gn$white)] <- with(vlist$prop.HIV.aware, pe[gender == "f" & ethnicity == "w" & risk == "het"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$het.f,gp18.gn$black)] <- with(vlist$prop.HIV.aware, pe[gender == "f" & ethnicity == "b" & risk == "het"])
-	#vparameters$prop.HIV.aware[intersect(gp18.gn$het.f,gp18.gn$hisp)] <- with(vlist$prop.HIV.aware, pe[gender == "f" & ethnicity == "h" & risk == "het"])
 	vparameters$prop.HIV.aware[gp18.gn$msm ] <- with(vlist$prop.HIV.aware, pe[risk == "msm"]) 
 	vparameters$prop.HIV.aware[gp18.gn$mwid] <- with(vlist$prop.HIV.aware, pe[risk == "mwid"]) 
 	vparameters$prop.HIV.aware[intersect(gp18.gn$pwid, gp18.gn$male  )] <- with(vlist$prop.HIV.aware, pe[gender == "m" & risk == "pwid"]) 
@@ -490,7 +399,6 @@ par_fix <- function(vparameters, vlist){
 	# prop.high.sus: 7 to  18, 0.25 certain for msm, mpwid, NA for pwid
 	# proportion high risk susceptible
 	vparameters$prop.high.sus <- numeric(length(vparameters$names18))
-	#vparameters$prop.high.sus[gp18.gn$all.msm] <- with(vlist$prop.high.sus, pe[risk == "msm"])
 	vparameters$prop.high.sus[intersect(gp18.gn$het.m,gp18.gn$white)] <- with(vlist$prop.high.sus, pe[gender == "m" & ethnicity == "w" & risk == "het"])
 	vparameters$prop.high.sus[intersect(gp18.gn$het.m,gp18.gn$black)] <- with(vlist$prop.high.sus, pe[gender == "m" & ethnicity == "b" & risk == "het"])
 	vparameters$prop.high.sus[intersect(gp18.gn$het.m,gp18.gn$hisp)]  <- with(vlist$prop.high.sus, pe[gender == "m" & ethnicity == "h" & risk == "het"])
@@ -498,10 +406,8 @@ par_fix <- function(vparameters, vlist){
 	vparameters$prop.high.sus[intersect(gp18.gn$het.f,gp18.gn$black)] <- with(vlist$prop.high.sus, pe[gender == "f" & ethnicity == "b" & risk == "het"])
 	vparameters$prop.high.sus[intersect(gp18.gn$het.f,gp18.gn$hisp)]  <- with(vlist$prop.high.sus, pe[gender == "f" & ethnicity == "h" & risk == "het"])
 	
-	# prop.high.inf: 8 to  18, 0.27 certain for msm, 0.3 certain for mpwid, NA for pwid (proportion high risk infected)
+	# proportion high risk infected
 	vparameters$prop.high.inf <- numeric(length(vparameters$names18))
-	#vparameters$prop.high.inf[gp18.gn$msm] <- with(vlist$prop.high.inf, pe[risk == "msm"])[1]
-	#vparameters$prop.high.inf[gp18.gn$mwid] <- with(vlist$prop.high.inf, pe[risk == "mwid"])[1]
 	vparameters$prop.high.inf[intersect(gp18.gn$het.m,gp18.gn$white)] <- with(vlist$prop.high.inf, pe[gender == "m" & ethnicity == "w" & risk == "het"])
 	vparameters$prop.high.inf[intersect(gp18.gn$het.m,gp18.gn$black)] <- with(vlist$prop.high.inf, pe[gender == "m" & ethnicity == "b" & risk == "het"])
 	vparameters$prop.high.inf[intersect(gp18.gn$het.m,gp18.gn$hisp)]  <- with(vlist$prop.high.inf, pe[gender == "m" & ethnicity == "h" & risk == "het"])
@@ -511,8 +417,6 @@ par_fix <- function(vparameters, vlist){
 	
 	# proportion young susceptible:
 	vparameters$prop.young.sus <- numeric(length(vparameters$names18))
-	#vparameters$prop.young.sus[gp18.gn$Y.msm] <- with(vlist$prop.young.sus, pe[risk == "msm"])
-	#vparameters$prop.young.sus[gp18.gn$mwid]  <- with(vlist$prop.young.sus, pe[risk == "mwid"])
 	vparameters$prop.young.sus[intersect(gp18.gn$msm,gp18.gn$white)] <- with(vlist$prop.young.sus, pe[ethnicity == "w" & risk == "msm"])
 	vparameters$prop.young.sus[intersect(gp18.gn$msm,gp18.gn$black)] <- with(vlist$prop.young.sus, pe[ethnicity == "b" & risk == "msm"])
 	vparameters$prop.young.sus[intersect(gp18.gn$msm,gp18.gn$hisp)]  <- with(vlist$prop.young.sus, pe[ethnicity == "h" & risk == "msm"])
@@ -522,8 +426,6 @@ par_fix <- function(vparameters, vlist){
 	
 	# proportion young infected:
 	vparameters$prop.young.inf <- numeric(length(vparameters$names18))
-	#vparameters$prop.young.inf[gp18.gn$msm] <- with(vlist$prop.young.inf, pe[risk == "msm"])[1]
-	#vparameters$prop.young.inf[gp18.gn$mwid] <- with(vlist$prop.young.inf, pe[risk == "mwid"])[1]
 	vparameters$prop.young.inf[intersect(gp18.gn$msm,gp18.gn$white)] <- with(vlist$prop.young.inf, pe[ethnicity == "w" & risk == "msm"])
 	vparameters$prop.young.inf[intersect(gp18.gn$msm,gp18.gn$black)] <- with(vlist$prop.young.inf, pe[ethnicity == "b" & risk == "msm"])
 	vparameters$prop.young.inf[intersect(gp18.gn$msm,gp18.gn$hisp)]  <- with(vlist$prop.young.inf, pe[ethnicity == "h" & risk == "msm"])
@@ -568,7 +470,6 @@ par_fix <- function(vparameters, vlist){
 	
 	## Parameter in 30 full gp domain ##
 	gp.gn <- gp.gn.fun(vparameters$names.gp)
-	#browser() #check gp.gn
 	# prop.link: % of diag linked to care (42 groups), no OAT and risk level differences
 	vparameters$prop.link <- numeric(length(vparameters$names.gp))
 	rname <- gsub(paste(c("/low", "/high","/old", "/young"), collapse = "|"), "", vparameters$names.gp)
@@ -579,26 +480,6 @@ par_fix <- function(vparameters, vlist){
 	
 	# noG: 18 to 30, msm=mwid, pwid=high.het (number of sexual partners opposite sex)
 	vparameters$noG <- numeric(length(vparameters$names.gp))
-	#browser()	
-	#vparameters$noG[intersect(gp.gn$all.msm, gp.gn$white)] <- with(vlist$noG, pe[risk %in% c("msm", "mwid") & ethnicity == "w"]) #msm/O-Y mwid/O-Y
-	#vparameters$noG[intersect(gp.gn$all.msm, gp.gn$black)] <- with(vlist$noG, pe[risk %in% c("msm", "mwid") & ethnicity == "b"]) #msm/O-Y mwid/O-Y
-	#vparameters$noG[intersect(gp.gn$all.msm, gp.gn$hisp )] <- with(vlist$noG, pe[risk %in% c("msm", "mwid") & ethnicity == "h"]) #msm/O-Y mwid/O-Y
-	#vparameters$noG[intersect(gp.gn$pwid, gp.gn$white)]    <- with(vlist$noG, pe[risk == "pwid" & ethnicity == "w"]) #m & f
-	#vparameters$noG[intersect(gp.gn$pwid, gp.gn$black)]    <- with(vlist$noG, pe[risk == "pwid" & ethnicity == "b"]) #m & f
-	#vparameters$noG[intersect(gp.gn$pwid, gp.gn$hisp )]    <- with(vlist$noG, pe[risk == "pwid" & ethnicity == "h"]) #m & f
-	#vparameters$noG[intersect(gp.gn$L.het.m, gp.gn$white)]   <- with(vlist$noG, pe[gender == "m" & risk == "het" & ethnicity == "w" & sex.risk.age.group == "low"])
-	#vparameters$noG[intersect(gp.gn$L.het.m, gp.gn$black)]   <- with(vlist$noG, pe[gender == "m" & risk == "het" & ethnicity == "b" & sex.risk.age.group == "low"])
-	#vparameters$noG[intersect(gp.gn$L.het.m, gp.gn$hisp )]   <- with(vlist$noG, pe[gender == "m" & risk == "het" & ethnicity == "h" & sex.risk.age.group == "low"])
-	#vparameters$noG[intersect(gp.gn$H.het.m, gp.gn$white)]   <- with(vlist$noG, pe[gender == "m" & risk == "het" & ethnicity == "w" & sex.risk.age.group == "high"])
-	#vparameters$noG[intersect(gp.gn$H.het.m, gp.gn$black)]   <- with(vlist$noG, pe[gender == "m" & risk == "het" & ethnicity == "b" & sex.risk.age.group == "high"])
-	#vparameters$noG[intersect(gp.gn$H.het.m, gp.gn$hisp )]   <- with(vlist$noG, pe[gender == "m" & risk == "het" & ethnicity == "h" & sex.risk.age.group == "high"])
-	#vparameters$noG[intersect(gp.gn$L.het.f, gp.gn$white)]   <- with(vlist$noG, pe[gender == "f" & risk == "het" & ethnicity == "w" & sex.risk.age.group == "low"])
-	#vparameters$noG[intersect(gp.gn$L.het.f, gp.gn$black)]   <- with(vlist$noG, pe[gender == "f" & risk == "het" & ethnicity == "b" & sex.risk.age.group == "low"])
-	#vparameters$noG[intersect(gp.gn$L.het.f, gp.gn$hisp )]   <- with(vlist$noG, pe[gender == "f" & risk == "het" & ethnicity == "h" & sex.risk.age.group == "low"])
-	#vparameters$noG[intersect(gp.gn$H.het.f, gp.gn$white)]   <- with(vlist$noG, pe[gender == "f" & risk == "het" & ethnicity == "w" & sex.risk.age.group == "high"])
-	#vparameters$noG[intersect(gp.gn$H.het.f, gp.gn$black)]   <- with(vlist$noG, pe[gender == "f" & risk == "het" & ethnicity == "b" & sex.risk.age.group == "high"])
-	#vparameters$noG[intersect(gp.gn$H.het.f, gp.gn$hisp )]   <- with(vlist$noG, pe[gender == "f" & risk == "het" & ethnicity == "h" & sex.risk.age.group == "high"])
-	
 	vparameters$noG[gp.gn$all.msm] <- with(vlist$noG, pe[risk == "msm"])
 	vparameters$noG[gp.gn$low]     <- with(vlist$noG, pe[risk == "het" & sex.risk.age.group == "low"])
 	vparameters$noG[gp.gn$H.het.m] <- with(vlist$noG, pe[gender == "m" & risk == "het" & sex.risk.age.group == "high"])
@@ -609,15 +490,6 @@ par_fix <- function(vparameters, vlist){
 	
 	# uio: 12 to 30, no risk diff in low,  pwid=high het, msm=mwid, H.het.f=L.het.f (prob condom use opposite sex)
 	vparameters$uio <- numeric(length(vparameters$names.gp))
-	#vparameters$uio[intersect(gp.gn$all.msm, gp.gn$white)] <- with(vlist$uio, pe[risk %in% c("msm", "mwid") & ethnicity == "w"])
-	#vparameters$uio[intersect(gp.gn$all.msm, gp.gn$black)] <- with(vlist$uio, pe[risk %in% c("msm", "mwid") & ethnicity == "b"])
-	#vparameters$uio[intersect(gp.gn$all.msm, gp.gn$hisp )] <- with(vlist$uio, pe[risk %in% c("msm", "mwid") & ethnicity == "h"])
-	#vparameters$uio[intersect(union(gp.gn$pwid.m, gp.gn$het.m),gp.gn$white)] <- with(vlist$uio, pe[risk %in% c("het", "pwid") & gender == "m" & ethnicity == "w"])
-	#vparameters$uio[intersect(union(gp.gn$pwid.m, gp.gn$het.m),gp.gn$black)] <- with(vlist$uio, pe[risk %in% c("het", "pwid") & gender == "m" & ethnicity == "b"])
-	#vparameters$uio[intersect(union(gp.gn$pwid.m, gp.gn$het.m),gp.gn$hisp )] <- with(vlist$uio, pe[risk %in% c("het", "pwid") & gender == "m" & ethnicity == "h"])
-	#vparameters$uio[intersect(union(gp.gn$pwid.f, gp.gn$het.f),gp.gn$white)] <- with(vlist$uio, pe[risk %in% c("het", "pwid") & gender == "f" & ethnicity == "w"])
-	#vparameters$uio[intersect(union(gp.gn$pwid.f, gp.gn$het.f),gp.gn$black)] <- with(vlist$uio, pe[risk %in% c("het", "pwid") & gender == "f" & ethnicity == "b"])
-	#vparameters$uio[intersect(union(gp.gn$pwid.f, gp.gn$het.f),gp.gn$hisp )] <- with(vlist$uio, pe[risk %in% c("het", "pwid") & gender == "f" & ethnicity == "h"])
 	vparameters$uio[gp.gn$all.msm] <- with(vlist$uio, pe[risk == "msm"])
 	vparameters$uio[union(gp.gn$het.m, gp.gn$pwid.m)]   <- with(vlist$uio, pe[risk == "het" & gender == "m"])
 	vparameters$uio[union(gp.gn$het.f, gp.gn$pwid.f)]   <- with(vlist$uio, pe[risk == "het" & gender == "f"])
@@ -625,15 +497,12 @@ par_fix <- function(vparameters, vlist){
 	# mor_S: 13 to 30, all pwid equal, low=high (mortality baseline), on OAT is lower (implement in ODE as part of prop.oat)
 	vparameters$mor_S <- numeric(length(vparameters$names.gp))
 	vparameters$mor_S[gp.gn$pwid] <- with(vlist$mor_S, pe[risk == "pwid"])[1]
-	#vparameters$mor_S[gp.gn$msm] <- with(vlist$mor_S, pe[risk == "msm"])
 	vparameters$mor_S[gp.gn$Y.msm] <- with(vlist$mor_S, pe[risk == "msm" & sex.risk.age.group == "young"])
 	vparameters$mor_S[gp.gn$O.msm] <- with(vlist$mor_S, pe[risk == "msm" & sex.risk.age.group == "old"])
-	#vparameters$mor_S[gp.gn$mwid] <- with(vlist$mor_S, pe[risk == "mwid"])
 	vparameters$mor_S[gp.gn$Y.mwid] <- with(vlist$mor_S, pe[risk == "mwid" & sex.risk.age.group == "young"])
 	vparameters$mor_S[gp.gn$O.mwid] <- with(vlist$mor_S, pe[risk == "mwid" & sex.risk.age.group == "old"])
 	vparameters$mor_S[gp.gn$het.m] <- with(vlist$mor_S, pe[risk == "het" & gender == "m"])
 	vparameters$mor_S[gp.gn$het.f] <- with(vlist$mor_S, pe[risk == "het" & gender == "f"])
-	#vparameters$mor_S[gp.gn$oat] <- vparameters$mor_S[gp.gn$oat] * vparameters$oat_mor
 	
 	
 	# Mortality rates for PLHIV were differentiated by HIV progression stages (acute and three CD4 levels)
@@ -648,10 +517,6 @@ par_fix <- function(vparameters, vlist){
 	# whether is pwid and whether on OAT
 	# mor_I2 (mor infected CD4: 200-499): 1 to 42, only diff by risk, on OAT is lower (implement in ODE as part of prop.oat)
 	vparameters$mor_I2 <- numeric(length(vparameters$names.gp))
-	#vparameters$mor_I2 <- rep(vlist$mor_I2$pe, length(vparameters$names.gp))
-	#vparameters$mor_I2[gp.gn$all.pwid] <- vparameters$mor_I2[gp.gn$all.pwid] * vparameters$pwid_mor2
-	#vparameters$mor_I2[gp.gn$oat] <- vparameters$mor_I2[gp.gn$oat] * vparameters$oat_mor
-	#vparameters$mor_I2[gp.gn$old] <- vparameters$mor_I2[gp.gn$old] * vparameters$old_mor
 	vparameters$mor_I2[gp.gn$pwid]   <- with(vlist$mor_I2, pe[risk == "pwid"]) * vparameters$pwid_mor2
 	vparameters$mor_I2[gp.gn$Y.msm]  <- with(vlist$mor_I2, pe[risk == "msm" & sex.risk.age.group == "young"])
 	vparameters$mor_I2[gp.gn$O.msm]  <- with(vlist$mor_I2, pe[risk == "msm" & sex.risk.age.group == "old"])
@@ -661,10 +526,6 @@ par_fix <- function(vparameters, vlist){
 	
 	# mor_I3 (mor infected CD4 < 200): 1 to 30, only diff by risk, on OAT is lower (implement in ODE as part of prop.oat)
 	vparameters$mor_I3 <- numeric(length(vparameters$names.gp))
-	#vparameters$mor_I3 <- rep(vlist$mor_I3$pe, length(vparameters$names.gp))
-	#vparameters$mor_I3[gp.gn$all.pwid] <- vparameters$mor_I3[gp.gn$all.pwid] * vparameters$pwid_mor3
-	#vparameters$mor_I3[gp.gn$oat] <- vparameters$mor_I3[gp.gn$oat] * vparameters$oat_mor
-	#vparameters$mor_I3[gp.gn$old] <- vparameters$mor_I3[gp.gn$old] * vparameters$old_morpop
 	vparameters$mor_I3[gp.gn$pwid]   <- with(vlist$mor_I3, pe[risk == "pwid"]) * vparameters$pwid_mor3
 	vparameters$mor_I3[gp.gn$Y.msm]  <- with(vlist$mor_I3, pe[risk == "msm" & sex.risk.age.group == "young"])
 	vparameters$mor_I3[gp.gn$O.msm]  <- with(vlist$mor_I3, pe[risk == "msm" & sex.risk.age.group == "old"])
@@ -677,46 +538,34 @@ par_fix <- function(vparameters, vlist){
 	vparameters$mor_T1 <- numeric(length(vparameters$names.gp))
 	vparameters$mor_T1[gp.gn$pwid.m] <- with(vlist$mor_T1, pe[risk == "pwid" & gender == "m"])
 	vparameters$mor_T1[gp.gn$pwid.f] <- with(vlist$mor_T1, pe[risk == "pwid" & gender == "f"])
-	#vparameters$mor_T1[gp.gn$msm] <- with(vlist$mor_T1, pe[risk == "msm"])
 	vparameters$mor_T1[gp.gn$Y.msm] <- with(vlist$mor_T1, pe[risk == "msm" & sex.risk.age.group == "young"])
 	vparameters$mor_T1[gp.gn$O.msm] <- with(vlist$mor_T1, pe[risk == "msm" & sex.risk.age.group == "old"])
-	#vparameters$mor_T1[gp.gn$mwid] <- with(vlist$mor_T1, pe[risk == "pwid"])
 	vparameters$mor_T1[gp.gn$Y.mwid] <- with(vlist$mor_T1, pe[risk == "mwid" & sex.risk.age.group == "young"])
 	vparameters$mor_T1[gp.gn$O.mwid] <- with(vlist$mor_T1, pe[risk == "mwid" & sex.risk.age.group == "old"])
 	vparameters$mor_T1[gp.gn$het.m] <- with(vlist$mor_T1, pe[risk == "het" & gender == "m"])
 	vparameters$mor_T1[gp.gn$het.f] <- with(vlist$mor_T1, pe[risk == "het" & gender == "f"])
-	#vparameters$mor_T1[gp.gn$oat] <- vparameters$mor_T1[gp.gn$oat] * vparameters$oat_mor
-	#vparameters$mor_T1[gp.gn$old] <- vparameters$mor_T1[gp.gn$old] * vparameters$old_mor
 	
 	# mor_T2 (mor infected CD4: 200-499 on ART): 18 to 30, on OAT is lower (implement in ODE as part of prop.oat)
 	vparameters$mor_T2 <- numeric(length(vparameters$names.gp))
 	vparameters$mor_T2[gp.gn$pwid.m] <- with(vlist$mor_T2, pe[risk == "pwid" & gender == "m"])
 	vparameters$mor_T2[gp.gn$pwid.f] <- with(vlist$mor_T2, pe[risk == "pwid" & gender == "f"])
-	#vparameters$mor_T2[gp.gn$msm] <- with(vlist$mor_T2, pe[risk == "msm"])
 	vparameters$mor_T2[gp.gn$Y.msm] <- with(vlist$mor_T2, pe[risk == "msm" & sex.risk.age.group == "young"])
 	vparameters$mor_T2[gp.gn$O.msm] <- with(vlist$mor_T2, pe[risk == "msm" & sex.risk.age.group == "old"])
-	#vparameters$mor_T2[gp.gn$mwid] <- with(vlist$mor_T2, pe[risk == "pwid"])
 	vparameters$mor_T2[gp.gn$Y.mwid] <- with(vlist$mor_T2, pe[risk == "mwid" & sex.risk.age.group == "young"])
 	vparameters$mor_T2[gp.gn$O.mwid] <- with(vlist$mor_T2, pe[risk == "mwid" & sex.risk.age.group == "old"])
 	vparameters$mor_T2[gp.gn$het.m] <- with(vlist$mor_T2, pe[risk == "het" & gender == "m"])
 	vparameters$mor_T2[gp.gn$het.f] <- with(vlist$mor_T2, pe[risk == "het" & gender == "f"])
-	#vparameters$mor_T2[gp.gn$oat] <- vparameters$mor_T2[gp.gn$oat] * vparameters$oat_mor
-	#vparameters$mor_T2[gp.gn$old] <- vparameters$mor_T2[gp.gn$old] * vparameters$old_mor
 	
 	# mor_T3 (mor infected CD4<200 on ART): 18 to 30, on OAT is lower (implement in ODE as part of prop.oat)
 	vparameters$mor_T3 <- numeric(length(vparameters$names.gp))
 	vparameters$mor_T3[gp.gn$pwid.m] <- with(vlist$mor_T3, pe[risk == "pwid" & gender == "m"])
 	vparameters$mor_T3[gp.gn$pwid.f] <- with(vlist$mor_T3, pe[risk == "pwid" & gender == "f"])
-	#vparameters$mor_T3[gp.gn$msm] <- with(vlist$mor_T3, pe[risk == "msm"])
 	vparameters$mor_T3[gp.gn$Y.msm] <- with(vlist$mor_T3, pe[risk == "msm" & sex.risk.age.group == "young"])
 	vparameters$mor_T3[gp.gn$O.msm] <- with(vlist$mor_T3, pe[risk == "msm" & sex.risk.age.group == "old"])
-	#vparameters$mor_T3[gp.gn$mwid] <- with(vlist$mor_T3, pe[risk == "pwid"])
 	vparameters$mor_T3[gp.gn$Y.mwid] <- with(vlist$mor_T3, pe[risk == "mwid" & sex.risk.age.group == "young"])
 	vparameters$mor_T3[gp.gn$O.mwid] <- with(vlist$mor_T3, pe[risk == "mwid" & sex.risk.age.group == "old"])
 	vparameters$mor_T3[gp.gn$het.m] <- with(vlist$mor_T3, pe[risk == "het" & gender == "m"])
 	vparameters$mor_T3[gp.gn$het.f] <- with(vlist$mor_T3, pe[risk == "het" & gender == "f"])
-	#vparameters$mor_T3[gp.gn$oat] <- vparameters$mor_T3[gp.gn$oat] * vparameters$oat_mor
-	#vparameters$mor_T3[gp.gn$old] <- vparameters$mor_T3[gp.gn$old] * vparameters$old_mor
 	
 	# prop.S2: 21 to 30, LOW: mwid=msm=het, HIGH: msm=mwid (proportion of screened susceptible)
 	vparameters$prop.S2 <- numeric(length(vparameters$names.gp))
@@ -787,9 +636,6 @@ par_fix <- function(vparameters, vlist){
 	vparameters$viral_sup[gp18.gn$white] <- with(vlist$viral_sup, pe[ethnicity == "w"])
 	vparameters$viral_sup[gp18.gn$black] <- with(vlist$viral_sup, pe[ethnicity == "b"])
 	vparameters$viral_sup[gp18.gn$hisp]  <- with(vlist$viral_sup, pe[ethnicity == "h"])
-	#vparameters$viral_sup[gp18.gn$white] <- calib.target$viral_sup.obs[1,"w"]
-	#vparameters$viral_sup[gp18.gn$black] <- calib.target$viral_sup.obs[1,"b"]
-	#vparameters$viral_sup[gp18.gn$hisp]  <- calib.target$viral_sup.obs[1,"h"]
 	
 	# prop.T1, prop.T2, prop.T3: 30*1 each (initial proportion of different T stages)
 	vparameters$prop.T1 <- matrix(0, nrow = length(vparameters$names.gp), ncol = 1)
@@ -809,11 +655,6 @@ par_fix <- function(vparameters, vlist){
 	vparameters$prop.T2[gp.gn$het.f] <- with(vlist$prop.T, pe[cd4 == 2 & risk == "het" & gender == "f"])
 	
 	vparameters$prop.T3 <- 1-vparameters$prop.T1-vparameters$prop.T2
-	#vparameters$prop.T3[gp.gn$msm] <- with(vlist$prop.T, pe[cd4 == 3 & risk == "msm"])
-	#vparameters$prop.T3[gp.gn$mwid] <- with(vlist$prop.T, pe[cd4 == 3 & risk == "mwid"])
-	#vparameters$prop.T3[gp.gn$pwid] <- with(vlist$prop.T, pe[cd4 == 3 & risk == "pwid"])
-	#vparameters$prop.T3[gp.gn$het.m] <- with(vlist$prop.T, pe[cd4 == 3 & risk == "het" & gender == "m"])
-	#vparameters$prop.T3[gp.gn$het.f] <- with(vlist$prop.T, pe[cd4 == 3 & risk == "het" & gender == "f"])
 	
 	
 	# prop.O: 12*3 to 30*3 (initial proportion of different O stages)
@@ -873,16 +714,7 @@ par_fix <- function(vparameters, vlist){
 	vparameters$ass.eS <- numeric(length(vparameters$names.e2))
 	vparameters$ass.eS[grep("old", vparameters$names.e2)] <- with(vlist$ass.eS, pe[sex.risk.age.group == "old"])
 	vparameters$ass.eS[grep("young", vparameters$names.e2)] <- with(vlist$ass.eS, pe[sex.risk.age.group == "young"])
-	
-	
-	## SSP parameter ## Come from service update - keep option for time varying v.ssp
-	#vparameters$v.ssp   <- numeric(1)
-	#vparameters$v.ssp   <- with(vlist$v.ssp,pe[year == "2015"])
-	#SSP.update      <- with(vlist$v.ssp,pe)[2]                                  #Further simplify to remove SSP.update 
-	#IntBaseline.SSP <- SSP.update                                               #Update baseline level in Par_fix with IntBaseline.SSP <- with(vlist$v.ssp, pe)[2]
-	#if (all(vparameters$v.ssp != with(vlist$v.ssp,pe[year == "2018"]))){
-	#	vparameters$v.ssp <- round(seq(from=vparameters$v.ssp, to=with(vlist$v.ssp,pe[year == "2018"]), by = ((with(vlist$v.ssp,pe[year == "2018"]) - vparameters$v.ssp) / (with(vlist$v.ssp,year)[2]-with(vlist$v.ssp,year)[1]))))
-	#} #Compare 1st year value (vparameters$v.ssp   <- with(vlist$v.ssp,pe)[1])) and last year value with(vlist$v.ssp,pe)[2]
+
 	
 	# Set up time to avoid hard-coded year
 	length     <- length(vlist$prop.ssp$year)
@@ -904,19 +736,8 @@ par_fix <- function(vparameters, vlist){
 			length.out = time
 		)
 	}
-	#browser() #Check prop.ssp replace cov.ssp
-	
+
 	## PrEP parameter ##
-	# 2012-2017 total number of MSM/MPWID receiving PREP
-	#vparameters$prep.total <- vlist$prep.total$pe * vparameters$prep.scn
-	
-	# proportion of individuals on PREP by ethnicity
-	#vparameters$prep.proportion <- numeric(3)
-	#vparameters$prep.proportion[1] <- with(vlist$prep.proportion, pe[ethnicity == "w"])
-	#vparameters$prep.proportion[2] <- with(vlist$prep.proportion, pe[ethnicity == "b"])
-	#vparameters$prep.proportion[3] <- with(vlist$prep.proportion, pe[ethnicity == "h"])
-	
-	
 	# Covid disruption
 	covid_prep <- numeric(length(vparameters$names.gp))
 	covid_prep[intersect(gp.gn$white, gp.gn$young)] <- with(vlist$covid_prep, pe[ethnicity == "w" & sex.risk.age.group == "young"])
@@ -1010,41 +831,6 @@ par_fix <- function(vparameters, vlist){
 	
 	
 	## OAT parameter ##
-	# 4 years (2012-2015), population on BUP/MET, gender * ethnicity
-	# probably will change this part for new model
-	#vparameters$nBUP.m <- matrix(0, nrow = 4, ncol = 6)
-	#vparameters$nBUP.m[, 1] <- round(vlist$OATDATACapacity$pe[-1] * (1 - vlist$PropGenderOATBup$pe) * with(vlist$PropEthnicityOATBup, pe[gender == "m" & ethnicity == "w"]) * vlist$PropDATAPhysCity$pe * vlist$PropPWIDPatients$pe)
-	#vparameters$nBUP.m[, 2] <- round(vlist$OATDATACapacity$pe[-1] * (1 - vlist$PropGenderOATBup$pe) * with(vlist$PropEthnicityOATBup, pe[gender == "m" & ethnicity == "b"]) * vlist$PropDATAPhysCity$pe * vlist$PropPWIDPatients$pe)
-	#vparameters$nBUP.m[, 3] <- round(vlist$OATDATACapacity$pe[-1] * (1 - vlist$PropGenderOATBup$pe) * with(vlist$PropEthnicityOATBup, pe[gender == "m" & ethnicity == "h"]) * vlist$PropDATAPhysCity$pe * vlist$PropPWIDPatients$pe)
-	#vparameters$nBUP.m[, 4] <- round(vlist$OATDATACapacity$pe[-1] * vlist$PropGenderOATBup$pe * with(vlist$PropEthnicityOATBup, pe[gender == "f" & ethnicity == "w"]) * vlist$PropDATAPhysCity$pe * vlist$PropPWIDPatients$pe)
-	#vparameters$nBUP.m[, 5] <- round(vlist$OATDATACapacity$pe[-1] * vlist$PropGenderOATBup$pe * with(vlist$PropEthnicityOATBup, pe[gender == "f" & ethnicity == "b"]) * vlist$PropDATAPhysCity$pe * vlist$PropPWIDPatients$pe)
-	#vparameters$nBUP.m[, 6] <- round(vlist$OATDATACapacity$pe[-1] * vlist$PropGenderOATBup$pe * with(vlist$PropEthnicityOATBup, pe[gender == "f" & ethnicity == "h"]) * vlist$PropDATAPhysCity$pe * vlist$PropPWIDPatients$pe)
-	#vparameters$nMET.m <- matrix(0, nrow = 4, ncol = 6)
-	#vparameters$nMET.m[, 1] <- round(with(vlist$nOAT_OTP, pe[gender == "m" & ethnicity == "w"]))
-	#vparameters$nMET.m[, 2] <- round(with(vlist$nOAT_OTP, pe[gender == "m" & ethnicity == "b"]))
-	#vparameters$nMET.m[, 3] <- round(with(vlist$nOAT_OTP, pe[gender == "m" & ethnicity == "h"]))
-	#vparameters$nMET.m[, 4] <- round(with(vlist$nOAT_OTP, pe[gender == "f" & ethnicity == "w"]))
-	#vparameters$nMET.m[, 5] <- round(with(vlist$nOAT_OTP, pe[gender == "f" & ethnicity == "b"]))
-	#vparameters$nMET.m[, 6] <- round(with(vlist$nOAT_OTP, pe[gender == "f" & ethnicity == "h"]))
-	
-	#vparameters$nOAT.m <- vparameters$nBUP.m + vparameters$nMET.m
-	
-	## Update OAT for 2019 and back filled 2015 to 2019, from Service-update.R
-	#MET.update      <- subset(read.xlsx("Data_Files/NewServiceLevels.xlsx", sheet="MET"), city == CITY)$pe
-	#BUP.update      <- subset(read.xlsx("Data_Files/NewServiceLevels.xlsx", sheet="BUP"), city == CITY)$pe
-	#IntBaseline.MET <- MET.update   #Update baseline level - move to Par_int
-	#IntBaseline.BUP <- BUP.update   #Update baseline level - move to Par_int
-	#oat15           <- vparameters$nOAT.m[4, ] # nOAT.m from par.fix: 4(years 12-15) * 6(gender* ethnicity), nOAT.m[4, ]: number nOAT (MET+BUP) for 2015
-	#oat19           <- MET.update + BUP.update # Number on OAT (MET + BUP) for 2019
-	
-	#add.oat.mx      <- matrix(0, nrow = 2019-2015, ncol = 6) # 4(years 2015-19)*6 (gender*ethnicity)
-	#for (uu in 1:6){
-	#	add.oat.mx[ , uu] <- round(seq(oat15[uu], oat19[uu], by = ((oat19[uu] - oat15[uu]) / (2019-2015))))[-1] 
-	# the seq function to generate a sequence of values starting from the number of OAT patients in 2015 (oat15[uu]) to the number in 2019 (oat19[uu]).
-	# The by argument in seq calculates the step size based on the difference between the numbers for 2019 and 2015, divided by the number of years between 2015 and 2019.(thus, cosntant ,i.e., 2015->16 =16->17)
-	#}
-	#vparameters$nOAT.m <- rbind(vparameters$nOAT.m, add.oat.mx)# New nOAT.m will now be a matrix 8 (years 12-19) * 6
-	
 	# Set up time to avoid hard-coded year
 	length     <- length(vlist$prop.oat$year)
 	first.year <- vlist$prop.oat$year[1]
@@ -1070,7 +856,6 @@ par_fix <- function(vparameters, vlist){
 	#### Screening rate parameter ####:
 	
 	# psi: directly pasted from the model calibration, no need to manipulate (baseline testing rate)
-	# psi.initial: Initial testing rate: assume msm = mwid, het =pwid
 	psi.initial <- numeric(length(vparameters$names.gp))
 	psi.initial[gp.gn$white] <- with(vlist$psi, pe[ethnicity == "w"])
 	psi.initial[gp.gn$black] <- with(vlist$psi, pe[ethnicity == "b"])
@@ -1095,27 +880,8 @@ par_fix <- function(vparameters, vlist){
 	
 	vparameters$psi.m <- rbind(psi.initial,psi.covid.m)
 	rownames(vparameters$psi.m ) <- c("before covid", "Mar-20", "Apr-20", "May-20", "Jun-20", "Jul-20", "Aug-20","after covid")
-	
-	# psi.slope.m: time-varying testing change rate 3 -> 3 years x 30 strata based on 3 races
-	# psi.slope.m <- matrix(0,nrow = 3,length(vparameters$names.gp))
-	# psi.slope.m[1, gp.gn$white] <- 1 + with(vlist$psi.slope, pe[ethnicity == "w" & year == "2013"])
-	# psi.slope.m[2, gp.gn$white] <- 1 + with(vlist$psi.slope, pe[ethnicity == "w" & year == "2014"])
-	# psi.slope.m[3, gp.gn$white] <- 1 + with(vlist$psi.slope, pe[ethnicity == "w" & year == "2015"])
-	# psi.slope.m[1, gp.gn$black] <- 1 + with(vlist$psi.slope, pe[ethnicity == "b" & year == "2013"])
-	# psi.slope.m[2, gp.gn$black] <- 1 + with(vlist$psi.slope, pe[ethnicity == "b" & year == "2014"])
-	# psi.slope.m[3, gp.gn$black] <- 1 + with(vlist$psi.slope, pe[ethnicity == "b" & year == "2015"])
-	# psi.slope.m[1, gp.gn$hisp] <- 1 + with(vlist$psi.slope, pe[ethnicity == "h" & year == "2013"])
-	# psi.slope.m[2, gp.gn$hisp] <- 1 + with(vlist$psi.slope, pe[ethnicity == "h" & year == "2014"])
-	# psi.slope.m[3, gp.gn$hisp] <- 1 + with(vlist$psi.slope, pe[ethnicity == "h" & year == "2015"])
-	# 
-	# # psi.m: time-varying testing rate, 4 periods x 30 strata
-	# vparameters$psi.m <- rbind(psi.initial,
-	# 													 psi.initial * psi.slope.m[1,],
-	# 													 psi.initial * psi.slope.m[1,] * psi.slope.m[2,],
-	# 													 psi.initial * psi.slope.m[1,] * psi.slope.m[2,] * psi.slope.m[3,]
-	#														)
-	#browser() # vparameters$prop.HIV.aware, phi1_,phi2_,phi3_,alpha1_,alpha2_,alpha3_,vparameters$T1_O,vparameters$T2_O,vparameters$T3_O,vparameters$O_T
-	# rm(p1,alpha1_,alpha2_,alpha3_,phi1_,phi2_,phi3_)
+
+	rm(p1,alpha1_,alpha2_,alpha3_,phi1_,phi2_,phi3_)
 	return(vparameters)
 }
 
@@ -1136,15 +902,7 @@ par_pop <- function(vparameters, vlist){
 	
 	
 	# prop.msm.among.male: 1 to 3 (proportion of MSM for each ethnicity)
-	#if (CITY == "NYC") {
-	#  region.prop_m.msm <- numeric(5)
-	#  region.prop_m.msm[1:4] <- vlist$prop.msm.among.male$pe[1:4]
-	#  region.prop_m.msm[5] <- with(vlist$prop.msm.among.male, pe[region == "brooklyn"])
-	#  prop.msm.among.male <- sum(region.prop_m.msm * as.numeric(vlist$prop.msm.among.male$male.pop)) / sum(as.numeric(vlist$prop.msm.among.male$male.pop))
-	#  vparameters$prop.msm.among.male <- rep(prop.msm.among.male, 3)
-	#} else {
 	vparameters$prop.msm.among.male <- rep(vlist$prop.msm.among.male$pe, 3)
-	#}
 	
 	# prop.male.among.pwid: 1 to 3 (Male proportion among all ethnic groups for PWID)
 	vparameters$prop.male.among.pwid <- rep(vlist$prop.male.among.pwid$pe, 3)
@@ -1170,25 +928,14 @@ par_pop <- function(vparameters, vlist){
 	vparameters$prop.mpwid.among.msm[2] <- with(vlist$prop.mpwid.among.msm, pe[ethnicity == "b"])
 	vparameters$prop.mpwid.among.msm[3] <- with(vlist$prop.mpwid.among.msm, pe[ethnicity == "h"])
 	
-	
-	## Read in target calibration population data (2011-2015) _move to load_target?
-	# total diagnosed cases, 18 groups
-	#diag18.obs <- data.matrix(subset(data.frame(read.xlsx("Data_Files/DM/Target.xlsx", sheet = "diag18.obs", colNames = T)), city == CITY)[, -1])
-	#ndiag18.obs<- data.matrix(subset(data.frame(read.xlsx("Data_Files/DM/Target.xlsx", sheet = "ndiag18.obs", colNames = T)), city == CITY)[, -1]) #new diagnoses, 18 groups
-	#death18.obs<- data.matrix(subset(data.frame(read.xlsx("Data_Files/DM/Target.xlsx", sheet = "death18.obs", colNames =T)), city == CITY)[ ,-1]) #all-casue deaths, 18 groups
-	#obs.inc.all<- subset(data.frame(read.xlsx("Data_Files/DM/Target.xlsx", sheet="inc.all.obs", colNames =T)), city == CITY)[ , -1]              #new incidence, total and range
-	#obs.inc.msm<- subset(data.frame(read.xlsx("Data_Files/DM/Target.xlsx", sheet="inc.msm.obs", colNames =T)), city == CITY)[ , -1]              #new incidence, MSM and range
-	
 	# Derive model population initials #
 	source("ModelCoreModules/Parameter_input/Function-model.initial.R")
-	#init <- model.initial(par = vparameters, diag18 = diag18.obs[1, ], gp.gn = gp.gn) # Old with above diag18.obs
-	
 	init <- model.initial(par = vparameters, diag18 = vparameters$pop.diag, gp.gn = gp.gn) # 30*12 initials, initial population for 30 groups at 12 different states, inits2 within source(Function-model.initial.R)
 	
 	#####
-	inits <- cbind(init, inc_bo = 0, inc_bs = 0, inc_g = 0, diag = 0, diag_late = 0, positive_test = 0, viral_sup = 0, death = 0, D_T=0, I_T=0 , I_D = 0, death_D = 0) # adding states to track # infections (by 3 routes of transmission), new diagnoses and deaths among PLHIV,T: this is how x becomes 42X25
+	inits <- cbind(init, inc_bo = 0, inc_bs = 0, inc_g = 0, diag = 0, diag_late = 0, positive_test = 0, viral_sup = 0, death = 0) # adding states to track # infections (by 3 routes of transmission), new diagnoses and deaths among PLHIV,T: this is how x becomes 42X25
 	x <- as.vector(t(inits)) # ode function requires init as vector (x)
-	vparameters$init.group.prop <- as.vector(rowSums(init) / sum(init)) #T: basically a proportion of the number of people of each group over the total people, sum() to 1
+	vparameters$init.group.prop <- as.vector(rowSums(init) / sum(init)) 
 	
 	# initial population for 18 groups (collapsing young/old, low/high)
 	init.collap <- numeric(18)
@@ -1197,31 +944,8 @@ par_pop <- function(vparameters, vlist){
 		ind <- which(rname %in% vparameters$names18[i])
 		init.collap[i] <- sum(init[ind, ])
 	}
-	# T:code aggregates the initial population data for 18 groups by collapsing groups with similar names (after removing "/OAT", "/low", or "/high" substrings) and summing up their populations
-	#browser()
-	
-	# These two variables are required for estimating OAT and PrEP entry rates in ODE module (only use initial values) #
-	# number of PWID (include MWID) within the 9 collapsed groups:
-	# "MSM/PWID/white","MSM/PWID/black","MSM/PWID/hispanic","PWID/male/white", "PWID/male/black",
-	# "PWID/male/hispanic", "PWID/female/white","PWID/female/black","PWID/female/hispanic"
-	#vparameters$pop.pwid <- init.collap[grep("PWID", vparameters$names18)]
-	
-	# Create prop.oat for use in Par_int and Par_CEA to replace parts that used to indexed by OAT, also resuse later
-	#nOAT.m   <- vparameters$nOAT.m
-	#pop.pwid <- vparameters$pop.pwid
-	#nOAT     <- round(c(nOAT.m[nrow(nOAT.m), 1:3] * c(pop.pwid[1:3]/(pop.pwid[1:3] + pop.pwid[4:6]), 1-pop.pwid[1:3]/(pop.pwid[1:3] + pop.pwid[4:6])), nOAT.m[nrow(nOAT.m), 4:6]))
-	#vparameters$prop.oat <- nOAT / pop.pwid
-	
-	# Repeat first 3 values for MSM/PWID/old&young, revisit for update time-varying prop.oat
-	#vparameters$prop.oat.12 <- c(vparameters$prop.oat[1:3], vparameters$prop.oat)
-	
-	# initial number of susceptible high-risk MSM (include MWID) within the 3 collapsed groups (race only) - Now Young/MSM
-	#vparameters$msm.h.scep <- rowSums(matrix(rowSums(inits[gp.gn$Y.allmsm, 1:3]), nrow = 3))
-	
-	vparameters$prop.adj <- FALSE # force the risk group proportions to remain constant
-	vparameters$inf.prop.adj <- FALSE # force the risk level proportions to remain constant among infected
+
 	vparameters$bal <- TRUE # balance # of sexual partnership between males & females
-	
 	############################
 	#pop.change: Pop growth is constant, convert pop.total to pop.change 
 	length     <- length(vlist$pop.total$year)
@@ -1235,7 +959,6 @@ par_pop <- function(vparameters, vlist){
 	pop.change.6[4] <- (with(vlist$pop.total, pe[ethnicity == "w" & gender == "f" & year == last.year]) - with(vlist$pop.total, pe[ethnicity == "w" & gender == "f" & year == first.year]))/time
 	pop.change.6[5] <- (with(vlist$pop.total, pe[ethnicity == "b" & gender == "f" & year == last.year]) - with(vlist$pop.total, pe[ethnicity == "b" & gender == "f" & year == first.year]))/time
 	pop.change.6[6] <- (with(vlist$pop.total, pe[ethnicity == "h" & gender == "f" & year == last.year]) - with(vlist$pop.total, pe[ethnicity == "h" & gender == "f" & year == first.year]))/time
-	#browser()
 	
 	############################
 	# Convert from 6 to 18 stratification: Inspired from model.initial
@@ -1275,10 +998,7 @@ par_pop <- function(vparameters, vlist){
 		vparameters$pop.change.18[intersect(gp18.gn$pwid,gp18.gn$female)[i]]   <- pop_pwid_f
 		vparameters$pop.change.18[gp18.gn$het.m[i]]    <- pop_het_m
 		vparameters$pop.change.18[gp18.gn$het.f[i]]    <- pop_het_f
-		#browser()	
 	}
-#	browser()  # Check sum(vparameters$pop.change.18[gp18.gn$white]), sum(vparameters$pop.change.18[gp18.gn$black]),... same as calculate from excel
-	
 	return(list(
 		vparameters   = vparameters,
 		x             = x

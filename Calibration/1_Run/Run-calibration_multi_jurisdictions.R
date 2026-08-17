@@ -8,7 +8,7 @@ library(tictoc)
 set.seed(1111)
 
 
-Jurisdictions <- c("MAR") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
+Jurisdictions <- c("SFA") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
 #
 
 for (CITY in Jurisdictions) {
@@ -55,9 +55,9 @@ for (CITY in Jurisdictions) {
 	git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
 	
 	#Step 5.1: Run single chain Metropolis Hasting
-	# calibration_results_single <- metropolis_hasting(calpar, calpar.info, vlist, vparameters,
-	# 																							 calib.target, valid.target, num_mh_iter = 8,
-	# 																						 num_resamples = 8, num_targets = num_targets)
+	calibration_results_single <- metropolis_hasting(calpar, calpar.info, vlist, vparameters,
+																								 calib.target, valid.target, num_mh_iter = 8,
+																							 num_resamples = 8, num_targets = num_targets)
 	
 	#saveRDS(calibration_results_single, paste0("Model_development/7.Red_strata/Calibration/Results/calibration_single-chain_results-", CITY, ".rds"))
 

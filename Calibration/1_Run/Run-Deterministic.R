@@ -4,12 +4,13 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(scales)
-CITY <- Jurisdictions <- "US" # MIA1, NYC1 for original, KIN, BAL, PHI -Pick any random cities, just need to get this running
+CITY <- Jurisdictions <- "MAR" # MIA1, NYC1 for original, KIN, BAL, PHI -Pick any random cities, just need to get this running
 current.int = c("No interventions")
 j = 1
 	
 ## LOAD all input parameters and comparators
-source("Load_run/LoadBaselineWorkspace.R")
+source("Calibration/2_Workflow/load_targets.R") #Update Target as needed - Part of par_pop.R - Need to move up here since diag18.obs is needed for initial pop
+source("ModelCoreModules/Parameter_input/LoadBaselineWorkspace.R")
 source("ModelCoreModules/Parameter_input/Module-Data.input.R")
 
 intervention.model.combination <- function(input.parameters,

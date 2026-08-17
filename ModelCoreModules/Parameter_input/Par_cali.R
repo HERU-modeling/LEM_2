@@ -1,9 +1,3 @@
-#####################
-# For testing, remove
-# rm(list = ls())
-# library(openxlsx2)
-
-# CITY <- "BAL"
 ######################
 ## READ in calibrated free parameters ##
 ## Derive free parameter information and values ##
@@ -25,10 +19,6 @@ names(par2) <- names
 
 # update parameter list with new free parameter values and save in par3
 for (l in seq_along(names)) {
-	#browser(expr= {l = 11})
-	#		if (length(unlist(vparameters[names[l]])) == 1) { #Don't really want to update vparameters as this should be done through vlist_to_vparameters
-	#			vparameters[[names[l]]] <- par2[[names[l]]]
-	#		}
 	if (par_info[par_info$parameter == names[l], ]$stratification == 0) {
 		vlist[[names[l]]]$pe <- par2[[names[l]]]
 	}
