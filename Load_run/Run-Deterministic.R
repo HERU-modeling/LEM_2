@@ -9,9 +9,9 @@ current.int = c("No interventions")
 j = 1
 	
 ## LOAD all input parameters and comparators
-source("Calibration/2_Workflow/load_targets.R") #Update Target as needed - Part of par_pop.R - Need to move up here since diag18.obs is needed for initial pop
 source("ModelCoreModules/Parameter_input/LoadBaselineWorkspace.R")
 source("ModelCoreModules/Parameter_input/Module-Data.input.R")
+source("load_run/Plot-Deterministic.R")
 
 intervention.model.combination <- function(input.parameters,
 																					 current.int) {
@@ -44,10 +44,13 @@ intervention.model.combination <- function(input.parameters,
 ## 3. evaluate the model and generating the result matrix
 outa <- intervention.model.combination(input.parameters = vparameters,
 																						 current.int = interventions[16])
+
+outa <- outa[,,c(1:6)]
 n.strata    <- apply(outa[ , c(1:16), ], c(1,3), sum)
+
 # Population Plot
 plot_stacked_area(time = vt, data=n.strata , name= colnames(n.strata), CITY="MAR")
-# Incidence Projection plot
+
 # Incidence Projection plot
 ## Add 1 dim to match existing code:
 outa <- array(
@@ -58,9 +61,9 @@ outa <- array(
 ### Run compute_inc_total,plot_target_2_median
 # Incidence index mapping
 inc_inds <- c(
-	White = gp.gn$white,
-	Black = gp.gn$black,
-	Hisp  = gp.gn$hisp
+	White = intersect(gp.gn$msm, gp.gn$white),
+	Black = intersect(gp.gn$msm, gp.gn$black),
+	Hisp  = intersect(gp.gn$msm, gp.gn$hisp)
 )
 #browser()	
 # Compute totals
@@ -85,10 +88,10 @@ g_inc <- plot_median_quantile(inc_array, dashed_year = 2025, strata_labels = c("
 g_inc
 
 #Population sums 
-pop_sum_white   <- apply(	outa[ , end_yr_ind, 1:16, gp.gn$white],	c(1),	sum) # Per Xiao, denominator for inc is All pop
-pop_sum_black   <- apply(	outa[ , end_yr_ind, 1:16, gp.gn$black],	c(1),	sum)
-pop_sum_hisp    <- apply(	outa[ , end_yr_ind, 1:16, gp.gn$hisp ],	c(1),	sum)
-pop_sum_all     <- apply(	outa[ , end_yr_ind, 1:16,  ],	c(1),	sum)
+pop_sum_white   <- apply(	outa[ , end_yr_ind, 1:16, intersect(gp.gn$msm, gp.gn$white)],	c(1),	sum) # Per Xiao, denominator for inc is All pop
+pop_sum_black   <- apply(	outa[ , end_yr_ind, 1:16, intersect(gp.gn$msm, gp.gn$black)],	c(1),	sum)
+pop_sum_hisp    <- apply(	outa[ , end_yr_ind, 1:16, intersect(gp.gn$msm, gp.gn$hisp) ],	c(1),	sum)
+pop_sum_all     <- apply(	outa[ , end_yr_ind, 1:16,  gp.gn$msm],	c(1),	sum)
 
 
 ##IRs 

@@ -17,7 +17,8 @@ length(vlist) <- nrow(par_info) # number of input parameters
 names(vlist) <- par_info$parameter # name of input parameters
 vparameters <- vlist # initialize vparameters - parameter list used in model
 
-
+# read in target - served as inputs for some parameters
+source("ModelCoreModules/Parameter_input/Par_targets.R") #  Need to move up here since diag18.obs is needed for initial pop
 # read in fixed parameters
 source("ModelCoreModules/Parameter_input/Par_fix.R")
 # read in initial population

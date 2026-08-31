@@ -1,3 +1,4 @@
+library(openxlsx)
 # Prevalence
 diag.obs  = data.matrix(subset(data.frame(read.xlsx("Data_files/Target/calibration_targets.xlsx", sheet="TotalDiagnosedPLHIV",  colNames =TRUE)), city == CITY & year != 2016)[ , c("W","B","H")])
 # New diagnoses

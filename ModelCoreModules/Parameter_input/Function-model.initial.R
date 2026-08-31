@@ -20,7 +20,6 @@ model.initial = function(par, diag18, gp.gn){
     pop.het.f  = pop.female - pop.pwid.f
     pop        = round(c(pop.msm, pop.mwid, pop.pwid.m, pop.pwid.f, pop.het.m, pop.het.f))
 
-    
     # Ensure prop.curr.art>viral_sup
     for (i in seq_len(length(prop.curr.art))) {
     		if (prop.curr.art[i] - viral_sup[i] <= 0) {
@@ -40,7 +39,7 @@ model.initial = function(par, diag18, gp.gn){
     
     # infected but not diag 
     I18 = (diag18 - prop.HIV.aware *diag18) /prop.HIV.aware 
-   
+  
 ############
 #Re-adjust I18 based on ndiag target   
     #Level 1: msm, het,pwid prop among ndiag
@@ -113,7 +112,7 @@ model.initial = function(par, diag18, gp.gn){
     # susceptible
     S18 = pop - diag18 - I18                                # diag18 = Da+D1+D2+D3+T1+T2+T3+O1+O2+O3
  
-    # ever on ART
+    # ever on ART - T3 was separated from T1&T2 in an attempts to better matched viral suppression
     T.ever18 = diag18 *prop.ever.art # prop.ever.art = (T1+T2+T3+O1+O2+O3)/diag18
     # on ART among ever on ART
     T18 = T.ever18 * prop.curr.art/prop.ever.art  # (T1+T2+T3) /(T1+T2+T3+O1+O2+O3) = prop.curr.art/prop.ever.art & T.ever18 = (T1+T2+T3+O1+O2+O3)
@@ -125,7 +124,7 @@ model.initial = function(par, diag18, gp.gn){
     D18 = diag18 - T18 - O18
     init18            = cbind(S18, I18, D18, T18_12,T18_3, O18)
     row.names(init18) = names18
-   
+
 # Check diag.allmsm: sum(init18[gp18.gn$all.msm ,c("D18","T18_12","T18_3","O18")]) 
 # Check diag.het.m:  sum(init18[gp18.gn$het.m ,c("D18","T18_12","T18_3","O18")])
 # Check diag.het.f:  sum(init18[gp18.gn$het.f ,c("D18","T18_12","T18_3","O18")])

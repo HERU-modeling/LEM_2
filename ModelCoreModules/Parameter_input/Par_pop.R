@@ -57,6 +57,7 @@ for (i in 1:18) {
   init.collap[i] <- sum(init[ind, ])
 }
 
+vparameters$prop.adj <- TRUE # Adjust pop change so that 1) respect the input in regards to races , 2) but maintain the proportion of each risk group as close as the initial population
 vparameters$bal <- TRUE # balance # of sexual partnership between males & females
 ############################
 #pop.change: Pop growth is constant, convert pop.total to pop.change 

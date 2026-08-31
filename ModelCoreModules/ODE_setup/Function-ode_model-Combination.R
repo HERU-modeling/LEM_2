@@ -77,7 +77,7 @@ ode_model <- function(t, x, vparameters) {
     y2 <- y[, 1:16] # selects only the first 16 columns of the matrix y and assigns them to a new matrix y2
     row.names(y2) <- names.gp
 
-    
+# browser(expr = {t >= 0})     
 if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
     	cat("⚠️ sum(y[,10]) / sum(y) > 0.9 — entering debug mode\n")
     	browser() 
@@ -109,37 +109,50 @@ if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
 
 
     ## TO UPDATE NEW ART ENGAGEMENT ##
-    if (t <= 48) {
+    if (t <= 12) {                 # At & Before Dec 2017
       phi1.t <- phi1[1, ]
       phi2.t <- phi2[1, ]
       phi3.t <- phi3[1, ]
       alpha1.t <- alpha1[1, ]
       alpha2.t <- alpha2[1, ]
       alpha3.t <- alpha3[1, ]
-    } else if (t > 48 & t <= 60) {
+    } else if (t > 12 & t <= 24) { # Jan 2018 - Dec 2018
       phi1.t <- phi1[2, ]
       phi2.t <- phi2[2, ]
       phi3.t <- phi3[2, ]
       alpha1.t <- alpha1[2, ]
       alpha2.t <- alpha2[2, ]
       alpha3.t <- alpha3[2, ]
-    } else if (t > 60 & t <= 72) {
+    } else if (t > 24 & t <= 36) { # Jan 2019 - Dec 2019
       phi1.t <- phi1[3, ]
       phi2.t <- phi2[3, ]
       phi3.t <- phi3[3, ]
       alpha1.t <- alpha1[3, ]
       alpha2.t <- alpha2[3, ]
       alpha3.t <- alpha3[3, ]
-    } else if (t > 72) {
+    } else if (t > 36 & t <= 48) { # Jan 2020 - Dec 2020
       phi1.t <- phi1[4, ]
       phi2.t <- phi2[4, ]
       phi3.t <- phi3[4, ]
       alpha1.t <- alpha1[4, ]
       alpha2.t <- alpha2[4, ]
       alpha3.t <- alpha3[4, ]
+    } else if (t > 48 & t <= 60) { # Jan 2021 - Dec 2021
+      phi1.t <- phi1[5, ]
+      phi2.t <- phi2[5, ]
+      phi3.t <- phi3[5, ]
+      alpha1.t <- alpha1[5, ]
+      alpha2.t <- alpha2[5, ]
+      alpha3.t <- alpha3[5, ]
+    } else if (t > 60) { # Jan 2022 onward
+      phi1.t <- phi1[6, ]
+      phi2.t <- phi2[6, ]
+      phi3.t <- phi3[6, ]
+      alpha1.t <- alpha1[6, ]
+      alpha2.t <- alpha2[6, ]
+      alpha3.t <- alpha3[6, ]
     }
     ## END UPDATING NEW ART ENGAGEMENT ##
-
     for (i in 1:18) {
       ind <- which(rname %in% names18[i])
       phi[ind, 1] <- phi1.t[i]
@@ -164,7 +177,7 @@ if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
       old.e.hiv[ind] <- vparameters$old.e.hiv[i]      
       prop_vs_T[ind] <- vparameters$prop_vs_T[i]
     }
-
+# browser(expr = {t >= 60})
 
     ### Time-varying number of OAT initiators ###
    if (t <= 12)          prop.oat.t <- prop.oat.m[1,] # 2017 Dec and before
@@ -223,7 +236,7 @@ if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
       prop.ssp.t = prop.ssp.t, eff.ssp = eff.ssp, s.multi = s.multi, bal, prop.oat.t = prop.oat.t,
       adherence.prep = adherence.prep, mix.prob.HL = mix.prob.HL, mix.prob.YO = mix.prob.YO
     )
-
+# browser(expr = {t >= 0})
     ############################
 
     ## TO UPDATE NEW PrEP ##
@@ -362,7 +375,8 @@ if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
     ############################
     #Goal: Adjust pop change so that 1) respect the input in regards to races , 2) but
     # maintain the proportion of each risk group as close as the initial population as possible
-    
+if (prop.adj == TRUE) {    
+# browser(expr = {t >= 0})    
     target.pop <- model.pop <- numeric(length(vparameters$names18))
     tot.group <- rowSums(y2)
    #target.pop: Initial 18 strata population, based on init.collap
@@ -484,7 +498,8 @@ if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
     					sum(pop.change.18[race])) < 1e-8
     	)
     }
-   
+}
+else {pop.change.18.new = pop.change.18}    
     # Create placeholder & new parameter
     pop.change.30 <- numeric(n.gp)
     prop.high.sus.all <- numeric(n.gp)
@@ -511,7 +526,7 @@ if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
     dif.het.high  <- (tot.group[low] + tot.group[high]) * as.numeric(prop.high.sus.all[high]) - tot.group[high]
     pop.change.30[high]  <- pop.change.30[high]  + dif.het.high
     pop.change.30[low]   <- pop.change.30[low] - dif.het.high
-    
+
 ############################
 # This code session is backbone for the "out" 30*21 result matrix
     # out is the population difference between time t and t+1
@@ -564,5 +579,6 @@ if (sum(y[, 10], na.rm = TRUE) / sum(y, na.rm = TRUE) > 0.9) {
 	     ) 
       }
     list(as.vector(t(out)))
+# browser()      
   })
 }

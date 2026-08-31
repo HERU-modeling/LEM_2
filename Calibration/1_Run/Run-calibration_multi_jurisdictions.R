@@ -21,7 +21,7 @@ for (CITY in Jurisdictions) {
 	source("ModelCoreModules/Parameter_input/LoadBaselineWorkspace.R")
 	
 	#  Load vparameters
-	source("Calibration/2_Workflow/load_targets.R") #Update Target as needed - Part of par_pop.R - Need to move up here since diag18.obs is needed for initial pop
+	# source("ModelCoreModules/Parameter_input/_targets.R") #Update Target as needed - Part of par_pop.R 
 	source("ModelCoreModules/Parameter_input/Module-Data.input.R")
 	
 	# Load calibration related functions
