@@ -5,3 +5,4 @@
 
 # Ignore everything in Results
 Calibration/3_Results/**
+Calibration/5_Plots/**

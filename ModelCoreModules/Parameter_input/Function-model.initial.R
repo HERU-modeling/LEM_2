@@ -182,7 +182,7 @@ model.initial = function(par, diag18, gp.gn){
      init[low , c("I", "D", "T12", "T3", "O")]   = init[low,  c("I", "D", "T12", "T3", "O")] *(1-as.numeric(prop.high.inf.all[high]))
      init[old , c("I", "D", "T12", "T3", "O")]   = init[old,  c("I", "D", "T12", "T3", "O")] *(1-as.numeric(prop.young.inf.all[young]))
 
-    # Re-distribute number of diagnosed PLHIV young/MSM to Infected young/MSM - Accounted for Lower awareness of HIV among young/MSM
+    # Re-distribute number of Infected Old to Infected Young - Accounted for Lower awareness of HIV among young/MSM
 
       sum.all.msm.I             = (init[young, c("I")] + init[old, c("I")])
       init[young, c("I")]       = sum.all.msm.I  * as.numeric(prop.young.I[msm.gn$young])
