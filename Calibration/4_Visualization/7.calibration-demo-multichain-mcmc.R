@@ -1,6 +1,7 @@
 ########################################
 #Read-in save results
-calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_check_af921fc_10-10_MAR.rds"))
+calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_Parallel3_7114a36_50-40_SFA.rds"))
+#calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_iter100_resam40_chains1_cores1_2_7114a36_100-40_SFA.rds"))
 calib_param <- calibration_results_multiple$calib_param
 #Re-Run toget meta data
 param_info <- add_param(names = calib_param, par_info = par_info, WB = WB, CITY = CITY) 
@@ -52,10 +53,10 @@ prior_stats     <- descriptive_stats(prior_samples)
 #prior_stats[prior_stats$name == "psi_f_b_het_na", ]
 #print(posterior_stats[grepl("^prop.HIV.aware", posterior_stats$name), ], n = Inf)
 #print(prior_stats[grepl("^noG", posterior_stats$name), ], n = Inf)
-posterior_stats_long <- expand_posterior_stats(posterior_stats)
+# posterior_stats_long <- expand_posterior_stats(posterior_stats)
 
 # Generate plot
-plot_prior_posterior_comparison(prior_samples, posterior_samples, calpar, adjust = 2)
+# plot_prior_posterior_comparison(prior_samples, posterior_samples, calpar, adjust = 2)
 # Comment for ggsave()
 # What you should be aiming for. TODO: this is not very useful, good to show, 
 # if prior/posterior similar, then dont put this in the paper. what should you expect.

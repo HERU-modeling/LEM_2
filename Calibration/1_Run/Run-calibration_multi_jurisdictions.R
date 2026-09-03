@@ -49,15 +49,15 @@ for (CITY in Jurisdictions) {
 	########################################
 	#Step 5:
 	num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
-	calib_name = "check"
-	num_mh_iter = 10
-	num_resamples = 10
+	calib_name = "Parallel3"
+	num_mh_iter = 50
+	num_resamples = 40
 	git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
 	
 	#Step 5.1: Run single chain Metropolis Hasting
-	calibration_results_single <- metropolis_hasting(calpar, calpar.info, vlist, vparameters,
-																								 calib.target, valid.target, num_mh_iter = 8,
-																							 num_resamples = 8, num_targets = num_targets)
+	# calibration_results_single <- metropolis_hasting(calpar, calpar.info, vlist, vparameters,
+	# 																							 calib.target, valid.target, num_mh_iter = 8,
+	# 																						 num_resamples = 8, num_targets = num_targets)
 	
 	#saveRDS(calibration_results_single, paste0("Model_development/7.Red_strata/Calibration/Results/calibration_single-chain_results-", CITY, ".rds"))
 

@@ -161,6 +161,7 @@ metropolis_hasting_multichain_combine <- function(calpar, calpar.info, vlist, vp
   # Create a cluster
   cl <- makeCluster(num_cores)
   registerDoParallel(cl)  # Register the cluster for parallel computing
+  clusterSetRNGStream(cl, iseed = 1111)
   
   # Export entire global environment
   clusterExport(cl, varlist = ls(globalenv()), envir = globalenv())
@@ -172,6 +173,7 @@ metropolis_hasting_multichain_combine <- function(calpar, calpar.info, vlist, vp
   # Run MH in parallel
   tic()
     multichain_result <- foreach(i=1:num_chains, .combine = c, .packages = c("mc2d","openxlsx","deSolve","progress","posterior")) %dopar% {
+    # multichain_result <- foreach(i=1:num_chains, .combine = c, .packages = c("mc2d","openxlsx","deSolve","progress","posterior")) %do% {
     metropolis_hasting(calpar, calpar.info, vlist, vparameters,
                                       calib.target, valid.target, num_mh_iter,
                                       num_resamples, num_targets, get_target = FALSE)

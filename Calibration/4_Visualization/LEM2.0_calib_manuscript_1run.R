@@ -844,3 +844,62 @@ ggsave(
 	dpi = 300
 )
 
+################ [Run this] Figure : MCMC Traceplots ###############
+source("Calibration/4_Visualization/plots.R", local = .GlobalEnv)
+
+# Jurisdictions <- all.cities
+# # c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL") 
+# # c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "ATL") # "SAC", "BMP", "ORF", 
+# # c("COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "NJE", "MEC") 
+# # c("COO", "EBR", "ORL", "BAL", "NYC") # "MIN","SUF", "WAY", "CLA", "NJE", "MEC"
+# # c("CUY", "FRA", "HAM", "PHI", "SHE", "BEX", "DFW", "HAR", "TRV", "KIN", "DCM") 
+# # all.cities
+# dir <- "All_10000-5000-jun23"
+# Jurisdiction_names <- Jurisdiction_labels[Jurisdictions]
+
+## Store plots as a list of rows 
+row_plots <- list()
+
+for (j in seq_along(Jurisdictions)) {
+  
+  message("Processing ", Jurisdictions[j])
+  
+  res <- readRDS(
+    paste0(
+      "Calibration/3_Results/calib_",
+      dir, "_", Jurisdictions[j], ".rds"
+    )
+  )
+  
+  trace_plot <- plot_multichain_trace(res$all_lls) + 
+    ggtitle(Jurisdiction_names[j])
+  
+  row_plots[[j]] <- trace_plot
+}
+for (j in seq_along(row_plots)) {
+  ggsave(
+    filename = paste0(
+      "Calibration/5_Plots/Individual/traceplot_",
+      Jurisdictions[j],
+      ".jpg"
+    ),
+    plot = row_plots[[j]],
+    width = 5,
+    height = 4,
+    dpi = 300
+  )
+}
+
+#4 - Combine into 4 × 8 grid with ONE shared legend
+combined_plot_trace <- wrap_plots(row_plots, ncol = 8) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+
+#5 - Save combined plot
+ggsave(
+  filename = "Calibration/5_Plots/traceplot_all.jpg",
+  plot = combined_plot_trace,
+  width = 24,
+  height = 12,
+  dpi = 300
+)
