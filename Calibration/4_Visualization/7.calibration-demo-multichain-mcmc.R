@@ -1,6 +1,63 @@
+#Step 0: Clear R environment
+rm(list = ls())
+#Step 1: Importing R functions & set seeds
+library(openxlsx)
+library(mc2d)
+library(posterior)
+# set.seed(1111)
+
+#Setting seed for reproducibility. Note that setting seeds doesn't guarantee the 
+#same output on different computer therefore you might be seeing different results
+#than I do. Setting seeds only guarantees the same output on the same computer.
+
+########################################
+#Step 2: Choosing city
+CITY <- "MAR" # MIA1, NYC1 for original, KIN, BAL, PHI
+
+
+########################################
+#Step 3: Importing LEM related packages
+# Importing baseline environment
+source("ModelCoreModules/Parameter_input/LoadBaselineWorkspace.R")
+
+#  Load vparameters
+# source("ModelCoreModules/Parameter_input/_targets.R") #Update Target as needed - Part of par_pop.R 
+source("ModelCoreModules/Parameter_input/Module-Data.input.R")
+
+# Load calibration related functions
+source("Calibration/2_Workflow/util.R")
+source("Calibration/2_Workflow/run_metropolis_hasting.R")
+source("Calibration/2_Workflow/objective_fn.R")
+
+# Load additional data not covered by current code
+source("Calibration/2_Workflow/util_intervention.R")
+source("Calibration/4_Visualization/plots.R")
+
+########################################
+#Step 4: Calibation parameter pre-processing
+#This step select the free parameters to calibration. 
+calib_param <- c("prop.HIV.aware","noG","nsG","s" ,"ass.eO" ,"ass.eS","psi" ,"phi1_" ,"alpha1_","mix.prob.YO", "mu_adj","d", "uio", "uis","v2","v3","T1_O","O_T")#
+param_info <- add_param(names = calib_param, par_info = par_info, WB = WB, CITY = CITY) 
+
+# update newly loaded parameters
+calpar <- param_info$calpar
+calpar.info <- param_info$calpar.info
+
+# Update vparameters with service updates (on psi) & intervention
+vparameters <- add_intervention_to_param(vparameters, "No interventions")
+
+########################################
+#Step 5:
+num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
+calib_name = "Seed"
+num_mh_iter = 10
+num_resamples = 5
+# seed = 3333
+git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
+
 ########################################
 #Read-in save results
-calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_Parallel3_7114a36_50-40_SFA.rds"))
+calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_Combine_1_7114a36_50-40_SFA.rds"))
 #calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_iter100_resam40_chains1_cores1_2_7114a36_100-40_SFA.rds"))
 calib_param <- calibration_results_multiple$calib_param
 #Re-Run toget meta data

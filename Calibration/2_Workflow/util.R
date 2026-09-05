@@ -760,3 +760,58 @@ run_diagnostics <- function(burned_samples,
 		)
 	)
 }
+
+#' Choose and combine best calibration results based on likleihood and combined them
+#'
+#' @param ... Lists of calibration results included sample sets & likelihood
+#' @param 
+#' @return diagnostics list
+#' @export
+combine_top_calibration <- function(..., top_prop = 0.50) {
+  
+  calibration_results <- list(...)
+  
+  if (top_prop <= 0 || top_prop > 1) {
+    stop("top_prop must be > 0 and <= 1.")
+  }
+  
+  selected <- lapply(calibration_results, function(x) {
+    
+    burned_lls <- x$burned_lls
+    burned_samples <- x$burned_samples
+    
+    if (length(burned_lls) != length(burned_samples)) {
+      stop("burned_lls and burned_samples must have the same length.")
+    }
+    
+    # Number of observations to keep
+    n_keep <- ceiling(length(burned_lls) * top_prop)
+    
+    # Identify which observations have the highest likelihoods
+    # (this determines WHICH observations are selected)
+    top_idx <- order(burned_lls, decreasing = TRUE)[seq_len(n_keep)]
+    
+    # Sort the selected indices back into their ORIGINAL order
+    top_idx <- sort(top_idx)
+    
+    list(
+      samples = burned_samples[top_idx],
+      lls = burned_lls[top_idx]
+    )
+  })
+  
+  # Combine while preserving the original order within each calibration result
+  combined_samples <- unlist(
+    lapply(selected, `[[`, "samples"),
+    recursive = FALSE
+  )
+  
+  combined_lls <- unlist(
+    lapply(selected, `[[`, "lls")
+  )
+  
+  list(
+    combined_samples = combined_samples,
+    combined_lls = combined_lls
+  )
+}

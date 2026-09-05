@@ -5,7 +5,7 @@ library(posterior)
 library(ggplot2)
 library(patchwork)
 library(cowplot)
-set.seed(1111)
+# set.seed(1111)
 
 # Add labels to 3 city code
 Jurisdiction_labels <- c(
@@ -44,9 +44,9 @@ Jurisdiction_labels <- c(
 )
 
 ################ CHANGE THIS AS NEEDED ###############
-Jurisdictions <- c("MAR", "SFA") #, "LOR", "SAC", "SDI"
+Jurisdictions <- c("SFA") #, "LOR", "SAC", "SDI"
 Jurisdiction_names <- Jurisdiction_labels[Jurisdictions]
-dir <- "check_156a386_10000-5000-aug26"
+dir <- "Seed_combined_590c3bb_50-40"
 
 ################ [Run this] Prepare Environment ###############
 #Step 2: Choosing city
