@@ -8,7 +8,7 @@ library(tictoc)
 # set.seed(1111)
 
 
-Jurisdictions <- c("SFA") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
+Jurisdictions <- c("MAR") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
 
 
 for (CITY in Jurisdictions) {
@@ -49,39 +49,78 @@ for (CITY in Jurisdictions) {
 	########################################
 	#Step 5:
 	num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
-	calib_name = "Seed"
-	num_mh_iter = 2000
-	num_resamples = 2000
+	calib_name = "get_target_true"
+	num_mh_iter = 100
+	num_resamples = 100
 	# seed = 3333
 	git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
+	# git_commit <- "04cff6d"
 	
 	seed_list          <- c(1111,2222,3333,4444,5555)
 	# Store results from each seed
 	calibration_results_all <- vector("list", length(seed_list))
 	
 	for (i in seq_along(seed_list)) {
-	  
+
 	  seed <- seed_list[i]
 	#Step 5.1: Run multiple chain Metropolis Hasting for each seed
 	calibration_results_multiple <- metropolis_hasting_multichain_combine(calpar, calpar.info, vlist, vparameters,
 	                                                                      calib.target, valid.target, num_mh_iter = num_mh_iter,
-	                                                                      num_resamples = num_resamples, num_targets = num_targets, num_chains = 4,
-	                                                                      num_cores = 4, seed = seed)
-	
+	                                                                      num_resamples = num_resamples, num_targets = num_targets, get_target = TRUE,
+	                                                                      num_chains = 4, num_cores = 4, seed = seed)
+
 	#Add meta-data
 	calibration_results_multiple$calib_param <- calib_param
 	saveRDS(calibration_results_multiple, paste0("Calibration/3_Results/calib_",calib_name,"_",seed,"_",git_commit,"_",num_mh_iter,"-",num_resamples,"_",CITY,".rds"))
-	# Store result for later combination
-	calibration_results_all[[i]] <- calibration_results_multiple
+	# # Store result for later combination
+	# calibration_results_all[[i]] <- calibration_results_multiple
+	# Remove large result from RAM before next iteration
+	rm(calibration_results_multiple)
+
+	# Force R to release unused memory
+	gc()
 	}
 	
+	calibration_results_1 <- readRDS(paste0(
+	  "Calibration/3_Results/calib_", calib_name, "_1111_", git_commit, "_",
+	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
+	))
+	calibration_results_2 <- readRDS(paste0(
+	  "Calibration/3_Results/calib_", calib_name, "_2222_", git_commit, "_",
+	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
+	))
+	calibration_results_3 <- readRDS(paste0(
+	  "Calibration/3_Results/calib_", calib_name, "_3333_", git_commit, "_",
+	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
+	))
+	calibration_results_4 <- readRDS(paste0(
+	  "Calibration/3_Results/calib_", calib_name, "_4444_", git_commit, "_",
+	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
+	))
+	calibration_results_5 <- readRDS(paste0(
+	  "Calibration/3_Results/calib_", calib_name, "_5555_", git_commit, "_",
+	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
+	))
 	
+	calibration_results_all <- list(
+	  calibration_results_1,
+	  calibration_results_2,
+	  calibration_results_3,
+	  calibration_results_4,
+	  calibration_results_5
+	)
 	# Step 5.2: Combine top results across seeds
-	combined_results <- do.call( combine_top_calibration,  c(calibration_results_all, list(top_prop = 0.50)))
+	# num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
+	calib_name = "get_target_true_combined"
+	num_resamples = 100
+	set.seed(1111)
 	
+	combined_results <- do.call( combine_top_calibration,  c(calibration_results_all, list(top_prop = 0.50)))
+
+	# Resample
 	posterior_samples_combined <- resample_using_importance_weights(combined_results$combined_samples,
 	                                                                combined_results$combined_lls,
-	                                                                ndraws = 2000) #num_resamples
+	                                                                ndraws = num_resamples) #num_resamples
 	target_result <- run_model_with_sample(posterior_samples_combined, calpar.info, vparameters, 
 	                                      vlist, calib.target, valid.target, 
 	                                      mode = "target", num_targets = num_targets)

@@ -130,11 +130,11 @@ metropolis_hasting <- function(calpar, calpar.info, vlist, vparameters,
 
 	list(accepted_samples = accepted_samples,
 			 accepted_ll = accepted_ll,
-			 output_df = output_df,
+			 output_df = output_df,                   #For multiple chain, since get_target = FALSE, will not impact run time/size
 			 posterior_samples = posterior_samples,
 			 target_model = target_result$model,
-			 target_obs = target_result$obs
-			 ,outa       = target_result$outa
+			 target_obs = target_result$obs,
+			 outa       = target_result$outa
 				) #Output for diagnostic plot, optional for calibration
 }
 
@@ -153,7 +153,7 @@ metropolis_hasting <- function(calpar, calpar.info, vlist, vparameters,
 #' @examples
 metropolis_hasting_multichain_combine <- function(calpar, calpar.info, vlist, vparameters, 
                                           calib.target, valid.target, num_mh_iter = 200,
-                                          num_resamples = 100, num_targets = 144, 
+                                          num_resamples = 100, num_targets = 144, get_target = FALSE, 
                                           num_chains = 1, num_cores = 2, seed = 1000){
   all_lls <- list()
   registerDoParallel(num_cores)
@@ -166,7 +166,7 @@ metropolis_hasting_multichain_combine <- function(calpar, calpar.info, vlist, vp
   # Export entire global environment
   clusterExport(cl, varlist = ls(globalenv()), envir = globalenv())
   
-  mh_result_size <- 7 # Add outa to to the above list
+  mh_result_size <- 7 # 7 if we need to use all potential outputs from metropolis_hasting:accepted_samples,accepted_ll,output_df,posterior_samples,target_result$model,target_result$obs,target_result$outa
   mh_ll_result_indices <- (1:num_chains)*mh_result_size - 5
   mh_sample_result_indices <- (1:num_chains)*mh_result_size - 6
 
@@ -180,6 +180,7 @@ metropolis_hasting_multichain_combine <- function(calpar, calpar.info, vlist, vp
   toc()
   # Stop the cluster to free resources
   stopCluster(cl)
+  
   # Process MH output
   all_lls     <- multichain_result[mh_ll_result_indices] # This would be where I can adjust to create a burn-in period
   all_samples <- multichain_result[mh_sample_result_indices]
@@ -199,15 +200,18 @@ metropolis_hasting_multichain_combine <- function(calpar, calpar.info, vlist, vp
   burned_lls <- unname(unlist(burned$all_lls)) 
   burned_samples <- unname(unlist(burned$all_samples, recursive = FALSE))
   
-  # posterior_samples <- resample_using_importance_weights(all_samples, all_lls, 
-  #                                                        ndraws = num_resamples)
+  if(get_target){
+    # Resample
   posterior_samples <- resample_using_importance_weights(burned_samples, burned_lls,
-  	ndraws = num_resamples)
+  	                                                     ndraws = num_resamples)
   
   target_result<- run_model_with_sample(posterior_samples, calpar.info, vparameters, 
   																			vlist, calib.target, valid.target, 
   																			mode = "target", num_targets = num_targets) # Default verbal = TRUE
-
+  }else{
+    posterior_samples <- NULL
+    target_result <- NULL
+  }
   
   return(list(posterior_samples = posterior_samples,
               target_model = target_result$model,
