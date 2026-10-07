@@ -8,7 +8,7 @@ library(tictoc)
 # set.seed(1111)
 
 
-Jurisdictions <- c("MAR") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
+Jurisdictions <- c("MAR","SFA", "LOR", "SAC") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
 
 
 for (CITY in Jurisdictions) {
@@ -36,7 +36,8 @@ for (CITY in Jurisdictions) {
 	########################################
 	#Step 4: Calibation parameter pre-processing
 	#This step select the free parameters to calibration. 
-	calib_param <- c("prop.HIV.aware","noG","nsG","s" ,"ass.eO" ,"ass.eS","psi" ,"phi1_" ,"alpha1_","mix.prob.YO", "mu_adj","d", "uio", "uis","v2","v3","T1_O","O_T")#
+	calib_param <- c("prop.HIV.aware","noG","nsG","s" ,"ass.eO" ,"ass.eS","psi" ,"phi1_" ,"alpha1_","mix.prob.YO", "mu_adj","d", "uio", "uis","v2","v3","T1_O","O_T")
+	#c("prop.HIV.aware","noG","nsG","s" ,"ass.eO" ,"ass.eS","psi" ,"phi1_" ,"alpha1_","mix.prob.YO", "mu_adj","d", "uio", "uis","v2","v3","T1_O","O_T")
 	param_info <- add_param(names = calib_param, par_info = par_info, WB = WB, CITY = CITY) 
 	
 	# update newly loaded parameters
@@ -49,14 +50,28 @@ for (CITY in Jurisdictions) {
 	########################################
 	#Step 5:
 	num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
-	calib_name = "get_target_true"
-	num_mh_iter = 100
-	num_resamples = 100
-	# seed = 3333
+	calib_name = "All2"
+	num_mh_iter = 20
+	num_resamples = 20
 	git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
-	# git_commit <- "04cff6d"
+	# git_commit <- "156a386"
 	
-	seed_list          <- c(1111,2222,3333,4444,5555)
+	seed_list          <- c(1234)
+	
+	if(length(seed_list) == 1)
+	{
+	  seed <- seed_list[1]
+	  calibration_results_multiple <- metropolis_hasting_multichain_combine(calpar, calpar.info, vlist, vparameters,
+	                                                                        calib.target, valid.target, num_mh_iter = num_mh_iter,
+	                                                                        num_resamples = num_resamples, num_targets = num_targets, get_target = TRUE,
+	                                                                        num_chains = 4, num_cores = 4, seed = seed)
+	  
+	  #Add meta-data
+	  calibration_results_multiple$calib_param <- calib_param
+	  saveRDS(calibration_results_multiple, paste0("Calibration/3_Results/calib_",calib_name,"_",seed,"_",git_commit,"_",num_mh_iter,"-",num_resamples,"_",CITY,".rds"))
+	} 
+	else
+	{ 
 	# Store results from each seed
 	calibration_results_all <- vector("list", length(seed_list))
 	
@@ -66,7 +81,7 @@ for (CITY in Jurisdictions) {
 	#Step 5.1: Run multiple chain Metropolis Hasting for each seed
 	calibration_results_multiple <- metropolis_hasting_multichain_combine(calpar, calpar.info, vlist, vparameters,
 	                                                                      calib.target, valid.target, num_mh_iter = num_mh_iter,
-	                                                                      num_resamples = num_resamples, num_targets = num_targets, get_target = TRUE,
+	                                                                      num_resamples = num_resamples, num_targets = num_targets, get_target = FALSE,
 	                                                                      num_chains = 4, num_cores = 4, seed = seed)
 
 	#Add meta-data
@@ -82,38 +97,30 @@ for (CITY in Jurisdictions) {
 	}
 	
 	calibration_results_1 <- readRDS(paste0(
-	  "Calibration/3_Results/calib_", calib_name, "_1111_", git_commit, "_",
+	  "Calibration/3_Results/calib_", calib_name, "_",seed_list[1],"_", git_commit, "_",
 	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
 	))
 	calibration_results_2 <- readRDS(paste0(
-	  "Calibration/3_Results/calib_", calib_name, "_2222_", git_commit, "_",
+	  "Calibration/3_Results/calib_", calib_name, "_",seed_list[2],"_", git_commit, "_",
 	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
 	))
 	calibration_results_3 <- readRDS(paste0(
-	  "Calibration/3_Results/calib_", calib_name, "_3333_", git_commit, "_",
+	  "Calibration/3_Results/calib_", calib_name, "_",seed_list[3],"_", git_commit, "_",
 	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
 	))
-	calibration_results_4 <- readRDS(paste0(
-	  "Calibration/3_Results/calib_", calib_name, "_4444_", git_commit, "_",
-	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
-	))
-	calibration_results_5 <- readRDS(paste0(
-	  "Calibration/3_Results/calib_", calib_name, "_5555_", git_commit, "_",
-	  num_mh_iter, "-", num_resamples, "_", CITY, ".rds"
-	))
+
 	
 	calibration_results_all <- list(
 	  calibration_results_1,
 	  calibration_results_2,
-	  calibration_results_3,
-	  calibration_results_4,
-	  calibration_results_5
+	  calibration_results_3
 	)
 	# Step 5.2: Combine top results across seeds
 	# num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
-	calib_name = "get_target_true_combined"
-	num_resamples = 100
-	set.seed(1111)
+	# calib_name = "psi"
+	num_resamples = 50
+	seed = 1111
+	set.seed(seed)
 	
 	combined_results <- do.call( combine_top_calibration,  c(calibration_results_all, list(top_prop = 0.50)))
 
@@ -129,9 +136,11 @@ for (CITY in Jurisdictions) {
 	                            target_model = target_result$model,
 	                            target_obs = target_result$obs,
 	                            outa       = target_result$outa,
+	                            all_samples= combined_results$combined_samples,
 	                            all_lls    = combined_results$combined_lls)
 	
-	saveRDS(calibration_results, paste0("Calibration/3_Results/calib_",calib_name,"_combined_",git_commit,"_",num_mh_iter,"-",num_resamples,"_",CITY,".rds"))
+	saveRDS(calibration_results, paste0("Calibration/3_Results/calib_",calib_name,"_combined_",git_commit,"_",seed,"-",num_resamples,"_",CITY,".rds"))
+	}
 ###################END   Copy step 3,4,5 from calibration-demo-multichain-mcmc#####
 
 cat("Completed model run for", CITY, "\n")

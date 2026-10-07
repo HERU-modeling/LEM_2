@@ -793,7 +793,7 @@ combine_top_calibration <- function(..., top_prop = 0.50) {
     
     # Sort the selected indices back into their ORIGINAL order
     top_idx <- sort(top_idx)
-    
+# browser()    
     list(
       samples = burned_samples[top_idx],
       lls = burned_lls[top_idx]

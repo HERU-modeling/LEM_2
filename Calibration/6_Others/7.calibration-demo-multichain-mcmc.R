@@ -49,8 +49,8 @@ num_resamples = 5
 git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
 
 #########Read-in save results####
-calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_Combine_1_7114a36_50-40_SFA.rds"))
-#calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_iter100_resam40_chains1_cores1_2_7114a36_100-40_SFA.rds"))
+calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_ALL_job2134755_combined_156a386_5000-5000_ATL.rds"))
+#calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_scen3_job1408795_1111_156a386_5000-5000_DUV.rds"))
 calib_param <- calibration_results_multiple$calib_param
 #Re-Run toget meta data
 param_info <- add_param(names = calib_param, par_info = par_info, WB = WB, CITY = CITY) 
@@ -58,9 +58,10 @@ calpar <- param_info$calpar
 calpar.info <- param_info$calpar.info
 
 
-posterior_samples <- resample_using_importance_weights(calibration_results_multiple$burned_samples,
-																											 calibration_results_multiple$burned_lls,
-																											 ndraws = 1000)
+# posterior_samples <- resample_using_importance_weights(calibration_results_multiple$burned_samples,
+# 																											 calibration_results_multiple$burned_lls,
+# 																											 ndraws = 1000)
+posterior_samples <- calibration_results_multiple$posterior_samples_combined
 prior_samples <- sample_dist_wrapper(1000, calpar)
 
 # Examine the PE, Upper, Lower & 
@@ -197,7 +198,7 @@ print(high_corr)
   														 nrow = 17, ncol = 6, byrow = TRUE) 
   rownames(target_model_table_median) <- rownames(target_model_table_lower) <- rownames(target_model_table_upper) <- rownames(target_model_table_mean) <- target_name
   
-source("Model_development/Optional_util_diagnostic_code/Utility_functions.R")
+  source("Calibration/6_Others/Utility_functions.R")
   p <- plot_pct_diff_heatmap(
   	target_obs_table,
   	target_model_table_mean,
@@ -265,7 +266,7 @@ source("Model_development/Optional_util_diagnostic_code/Utility_functions.R")
   	) +
   	theme_bw()
 ####### Output Posteriors for multiple results ####
-source("Model_development/Optional_util_diagnostic_code/Utility_functions.R") 
+  source("Calibration/6_Others/Utility_functions.R")
   param <- "All" #"v2v3","uio","uis","O_T","d" - Note to match save results names
   prefix    <- paste0("Model_development/7.Red_strata/Calibration/Results/calib_",param,"_10000-5000-jun23_")
   save_path <- paste0("Model_development/7.Red_strata/Calibration/Results/",param,"_posterior_values_output.xlsx")

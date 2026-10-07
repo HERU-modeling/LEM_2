@@ -69,21 +69,39 @@ source("Calibration/2_Workflow/util_intervention.R")
 source("Calibration/4_Visualization/plots.R")
 
 ################ CHANGE THIS AS NEEDED ###############
-Jurisdictions <- c("MAR","KIN","DUV")
+Jurisdictions <- c("MAR", "SFA")
+# c("MAR", "SAC", "SDI", "TAM","ATL", "MIN", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "MEC", "CUY", "HAM", "SHE", "BEX", "DFW", "TRV", "KIN", "DCM")
 # all.cities
+# c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "NJE", "MEC", "CUY", "FRA", "HAM", "PHI", "SHE", "BEX", "DFW", "HAR", "TRV", "KIN", "DCM")
 # Seed 5:   c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "NJE", "MEC", "CUY", "FRA", "HAM", "PHI", "SHE", "BEX", "DFW", "HAR", "TRV", "KIN", "DCM")
 # combined: c("MAR", "SFA", "DUV", "TAM", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "NJE", "FRA", "HAM", "PHI", "SHE", "DCM")
 Jurisdiction_names <- Jurisdiction_labels[Jurisdictions]
-dir <- "fix_scen2_scen2_job1041413_combined_156a386_2000-2000"
-  
+dir <- "All2_1111_a79c1a5_20-20"
+#"All_10000-5000-jun23"
+#"fix_scen2_top50_ALL_job2134755_combined_156a386_5000-5000"
+
+#"fix_trim10_scen2_job1041413_combined_156a386_2000-2000"  
+#"fix_trim10_scen3_job1408795_combined_156a386_5000-5000"  
 #"fix_scen1_combined_156a386_2000-2000" 
 #"fix_scen2_scen2_job1041413_combined_156a386_2000-2000"
+#"fix_scen2_scen3_job1408795_combined_156a386_5000-5000"
 
 #"fix_scen1_3333_156a386_2000-2000" 
 #"fix_scen2_scen2_job1041413_3333_156a386_2000-2000"
   
 #"Seed_combined_156a386_2000-2000"
 #"All_10000-5000-jun23"
+dev_obs_vs_target_run <- FALSE
+target_run <- FALSE
+ndiag_r_run <- FALSE
+ndiagr_incr_run <- FALSE
+inc_r_run <- TRUE
+IRR_run <- FALSE
+demographic_run <- FALSE
+combine_pop_run <- FALSE
+combine_inc_ndiag_run <- FALSE
+mcmc_run <- FALSE
+
 
 #Step 6:
 
@@ -170,8 +188,8 @@ plot_median_quantile <- function(input_array_model,
 	# QUANTILES — MODEL
 	median_vals_model <- apply(input_array_model, c(2,3), quantile, probs = 0.50)
 	# median_vals_model <- apply(input_array_model, c(2,3), mean)
-	lower_vals_model  <- apply(input_array_model, c(2,3), quantile, probs = 0.025)
-	upper_vals_model  <- apply(input_array_model, c(2,3), quantile, probs = 0.975)
+	lower_vals_model  <- apply(input_array_model, c(2,3), quantile, probs = 0.025) #95% credible lower: 0.025
+	upper_vals_model  <- apply(input_array_model, c(2,3), quantile, probs = 0.975) #95% credible lower: 0.975
 	
 	# STRATA LABELS
 	if (!is.null(strata_labels)) {
@@ -479,6 +497,7 @@ build_target_plots <- function(
 ################ [Run this] Target - Multiple City - %dev Obs Vs Target Table ###############
 # Setup
 
+if(dev_obs_vs_target_run){
 # Jurisdictions <- all.cities
 # dir <- "All_10000-5000-jun23"
 # Jurisdiction_names <- Jurisdiction_labels[Jurisdictions]
@@ -598,7 +617,7 @@ for (j in seq_along(Jurisdictions)) {
 # Output
 model_table
 obs_table
-source("Calibration/4_Visualization/Utility_functions.R")
+source("Calibration/6_Others/Utility_functions.R")
 p <- plot_pct_diff_heatmap(
   obs_table,
   model_table,
@@ -773,16 +792,11 @@ colMeans(p$param_summary[,"mean_abs_pct_diff"])
 # } 
 # p <- p + scale_x_discrete(labels = target_label)
 # p
-
+}
 ################ [Run this] Target - Multiple City ###############
 #Run: 
 
-library(patchwork)
-library(ggplot2)
-
-
-
-
+if(target_run){
 target_name <- target_name_extended[c(1:17)]
 target_label  <- target_labels[target_name_extended[c(1:17)]]
 target_name_ndiag <- target_name_extended[c(4:11)]
@@ -931,10 +945,11 @@ combined_plot <-
 # 	height   = 2.5 * length(Jurisdictions),
 # 	dpi      = 150
 # )
-
+}
 
 ################ [Run this] Figure : Projected new ndiagnosis &  Rate by races (w,b,h) - Multiple City ###############
 
+if(ndiag_r_run){
 # Jurisdictions <- c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP","COO", "MIN", "ORL", "BAL","WAY", "CLA", "NYC", "MEC","FRA", "HAM", "PHI", "HAR", "TRV", "KIN", "DCM")
 # # c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL") 
 # # c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "ATL") # "SAC", "BMP", "ORF", 
@@ -1126,8 +1141,9 @@ ggsave(
   height = 12,
   dpi = 300
 )
-
+}
 ################ [Run this] Figure : ndiagnosis rates (target) & incidence Rate (projected) All pop - Multiple City ###############
+if(ndiagr_incr_run){
 # Jurisdictions <- c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP","COO", "MIN", "ORL", "BAL","WAY", "CLA", "NYC", "MEC","FRA", "HAM", "PHI", "HAR", "TRV", "KIN", "DCM")
 # # c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL") 
 # # c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "ATL") # "SAC", "BMP", "ORF", 
@@ -1348,8 +1364,10 @@ ggsave(
   height = 12,
   dpi = 300
 )
-
+}
 ################ [Run this] Figure : Incidence &  Rate by races (w,b,h) - Multiple City ###############
+
+if(inc_r_run){
 # Jurisdictions <- c("MAR", "SFA", "LOR", "SAC", "SDI", "TAM", "BMP")
 # # c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL") 
 # # c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "ATL") # "SAC", "BMP", "ORF", 
@@ -1533,7 +1551,7 @@ legend <- g$grobs[[guide_positions[1]]]
 
 plots_ir <- lapply(plots_ir, function(p) p + labs(y = NULL))
 plots_ir <- lapply(plots_ir, function(p) p + theme(legend.position = "none"))
-combined_plot_ir_clean <- wrap_plots(plots_ir, ncol = 3)#8
+combined_plot_ir_clean <- wrap_plots(plots_ir, ncol = 8)#8
 
 #4 - Combine into 4 × 8 grid with ONE shared legend
 combined_plot_inc <- wrap_plots(plots_inc, ncol = 4) +
@@ -1563,8 +1581,9 @@ ggsave(
 	height = 12,
 	dpi = 300
 )
-
+}
 ################ [Run this] Figure 3: IRR - Multiple City ###############
+if(IRR_run ){
 # STEP 0: Setup
 library(ggpubr)
 
@@ -2005,9 +2024,9 @@ wide %>%
   ) %>%
   filter(both_decrease) %>%
   select(city)
-
+}
 ################ [Run this] Figure : Demographic & cascade of care change ###############
-
+if (demographic_run) {
 plot_stacked_area <- function(time, 
                               data, 
                               name, 
@@ -2320,8 +2339,11 @@ ggsave(
   height   = 49, #10
   dpi      = 150
 )
+}
 
 #########[Run this] Combined Pop figures ####
+
+if (combine_pop_run) {
 # library(ggplot2)
 # library(ggpubr)
 # library(cowplot)
@@ -2535,8 +2557,11 @@ for (j in seq_along(Jurisdictions)) {
 #     dpi = 300
 #   )
 # }
-
+}
 #########[Run this] Combined Inc ndiag figures ####
+
+
+if(combine_inc_ndiag_run){
 # library(ggplot2)
 # library(ggpubr)
 # library(cowplot)
@@ -2821,8 +2846,10 @@ for (j in seq_along(plots_ir)) {
     dpi = 300
   )
 }
-
+}
 ################ [Run this] Figure : MCMC Traceplots ###############
+
+if(mcmc_run){
 source("Calibration/4_Visualization/plots.R", local = .GlobalEnv)
 
 # Jurisdictions <- all.cities
@@ -2881,4 +2908,4 @@ ggsave(
   height = 12,
   dpi = 300
 )
-
+}
