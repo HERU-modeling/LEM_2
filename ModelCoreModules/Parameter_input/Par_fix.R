@@ -94,6 +94,15 @@ vparameters$pop.diag[gp18.gn$mwid]  <- with(vlist$pop.diag, pe[risk == "mwid"])
 vparameters$pop.diag[gp18.gn$het.f] <- with(vlist$pop.diag, pe[risk == "het" & gender == "f"])
 vparameters$pop.diag[gp18.gn$het.m] <- with(vlist$pop.diag, pe[risk == "het" & gender == "m"])
 
+# pop.change.18.prop
+vparameters$pop.change.18.prop <- numeric(length(vparameters$names18))
+vparameters$pop.change.18.prop[intersect(gp18.gn$pwid, gp18.gn$male)]   <- with(vlist$pop.change.18.prop, pe[risk == "pwid" & gender == "m"])
+vparameters$pop.change.18.prop[intersect(gp18.gn$pwid, gp18.gn$female)] <- with(vlist$pop.change.18.prop, pe[risk == "pwid" & gender == "f"])
+vparameters$pop.change.18.prop[gp18.gn$msm]   <- with(vlist$pop.change.18.prop, pe[risk == "msm"])
+vparameters$pop.change.18.prop[gp18.gn$mwid]  <- with(vlist$pop.change.18.prop, pe[risk == "mwid"])
+vparameters$pop.change.18.prop[gp18.gn$het.f] <- with(vlist$pop.change.18.prop, pe[risk == "het" & gender == "f"])
+vparameters$pop.change.18.prop[gp18.gn$het.m] <- with(vlist$pop.change.18.prop, pe[risk == "het" & gender == "m"])
+
 # T1_O: 12 to 18, m=f for pwid, het (ART dropout rate CD4 >= 500)
 vparameters$T1_O <- numeric(length(vparameters$names18))
 vparameters$T1_O[gp18.gn$white] <- with(vlist$T1_O, pe[ethnicity == "w"])

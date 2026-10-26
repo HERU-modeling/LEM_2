@@ -8,7 +8,7 @@ library(posterior)
 
 ######### 1. Set up ############
 #Step 2: Choosing city
-CITY <- "MAR" # MIA1, NYC1 for original, KIN, BAL, PHI
+CITY <- "SHE" # MIA1, NYC1 for original, KIN, BAL, PHI
 
 
 #Step 3: Importing LEM related packages
@@ -49,9 +49,10 @@ num_resamples = 5
 git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
 
 #########Read-in save results####
-calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_ALL_job2134755_combined_156a386_5000-5000_ATL.rds"))
-#calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_scen3_job1408795_1111_156a386_5000-5000_DUV.rds"))
-calib_param <- calibration_results_multiple$calib_param
+calibration_results_multiple1 <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_five-seed_job3917938_combined_156a386_2000-2000_SHE.rds"))
+calibration_results_multiple2 <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_reduced-h-nsg_job4283360_combined_156a386_2000-2000_SHE.rds"))
+get_calpar_info <- readRDS(paste0("Calibration/3_Results/calib_All_10000-5000-jun23_SHE.rds"))
+calib_param <- get_calpar_info$calib_param
 #Re-Run toget meta data
 param_info <- add_param(names = calib_param, par_info = par_info, WB = WB, CITY = CITY) 
 calpar <- param_info$calpar
@@ -61,17 +62,24 @@ calpar.info <- param_info$calpar.info
 # posterior_samples <- resample_using_importance_weights(calibration_results_multiple$burned_samples,
 # 																											 calibration_results_multiple$burned_lls,
 # 																											 ndraws = 1000)
-posterior_samples <- calibration_results_multiple$posterior_samples_combined
-prior_samples <- sample_dist_wrapper(1000, calpar)
+posterior_samples_1 <- calibration_results_multiple1$posterior_samples_combined
+posterior_samples_2 <- calibration_results_multiple2$posterior_samples_combined
+prior_samples <- sample_dist_wrapper(2000, calpar)
 
 # Examine the PE, Upper, Lower & 
 colnames_all_samples <- paste0(calpar$par, "_", calpar$gender, "_", calpar$ethnicity, "_",
 															 calpar$risk, "_", calpar$sex.risk.age.group)
-colnames(posterior_samples) <- c(colnames_all_samples)
+colnames(posterior_samples_1) <- c(colnames_all_samples)
+colnames(posterior_samples_2) <- c(colnames_all_samples)
 colnames(prior_samples)     <- c(colnames_all_samples)
 
-posterior_stats <- descriptive_stats(posterior_samples)
+posterior_stats_1 <- descriptive_stats(posterior_samples_1)
+posterior_stats_2 <- descriptive_stats(posterior_samples_2)
 prior_stats     <- descriptive_stats(prior_samples)
+
+posterior_stats_1[c(15:20,34:36),]
+posterior_stats_2[c(15:20,34:36),]
+prior_stats[c(15:20,34:36),]
 #posterior_stats[posterior_stats$name == "noG_m_b_mwid_Young", ]
 #prior_stats[prior_stats$name == "psi_f_b_het_na", ]
 #print(posterior_stats[grepl("^prop.HIV.aware", posterior_stats$name), ], n = Inf)
@@ -80,6 +88,14 @@ prior_stats     <- descriptive_stats(prior_samples)
 
 # Generate plot
 # plot_prior_posterior_comparison(prior_samples, posterior_samples, calpar, adjust = 2)
+plot_prior_posterior_comparison_2(
+  prior_samples,
+  posterior_samples_1,
+  posterior_samples_2 = posterior_samples_2,
+  calpar,
+  par_selected = c("nsG","psi"), Jurisdiction_names = CITY,
+  adjust =10
+)
 # Comment for ggsave()
 # What you should be aiming for. TODO: this is not very useful, good to show, 
 # if prior/posterior similar, then dont put this in the paper. what should you expect.
@@ -388,3 +404,258 @@ print(high_corr)
     param_y = "psi_na_w_na_na"
   )
   
+  ####### Examine: pop.change.30  ####  
+  ###############1. Figure - 1 strata Panel #########
+  
+  # Extract Seed
+calibration_results <- readRDS(paste0("Calibration/3_Results/calib_prop.adj_TRUE_1234_714fdc9_100-100_SHE.rds"))
+  # str(calibration_results$pop.change.30): 1000 samples * 348 times * 30 strata
+  pop.change.30 <-  aperm(calibration_results$pop.change.30, c(1,3,2))
+
+plot_strata_ci <- function(arr, strata_name) {
+  
+  strata_idx <- which(dimnames(arr)$group == strata_name)
+  
+  tmp <- arr[, , strata_idx]
+  
+  df <- data.frame(
+    month = seq_len(ncol(tmp)),
+    median = apply(tmp, 2, median),
+    lower  = apply(tmp, 2, quantile, 0.025),
+    upper  = apply(tmp, 2, quantile, 0.975)
+  )
+#browser()  
+  ggplot(df, aes(month, median)) +
+    geom_ribbon(aes(ymin = lower, ymax = upper),
+                alpha = 0.3) +
+    geom_line(size = 0.8) +
+    labs(
+      title = strata_name,
+      x = "Month",
+      y = "Value"
+    ) +
+    theme_bw()
+}
+plot_strata_ci(
+  calibration_results$pop.change.30/12,
+  "MSM/young/black"
+) 
+
+###############1. Figure - 1 strata Panel #########
+
+
+###############2. Figure - Multiple strata Panel #########
+## Plot monthly population entrants (pop.change.30 / 12) by stratum:
+## posterior median + 95% interval, one figure per city, 30 panels (3 columns x 10 rows).
+## Run from the project root.
+
+dir <- "prop.adj_FALSE_1234_714fdc9_500-500"
+Jurisdictions  <- c("MAR")
+
+for (j in seq_along(Jurisdictions)) {
+  calibration_results <- readRDS(
+    paste0(
+      "Calibration/3_Results/calib_",
+      dir, "_", Jurisdictions[j], ".rds"
+    )
+  )
+  pc <-  calibration_results$pop.change.30 / 12
+  # f <- list.files("Calibration/3_Results", full.names = TRUE,
+  #                 pattern = paste0(run_tag, "_combined_.*_", city, "\\.rds$"))
+  # 
+  # pc <- readRDS(f)$pop.change.30 / 12           # [sample x month x group], monthly entrants
+  
+  q <- apply(pc, c(2, 3), quantile, probs = c(0.025, 0.5, 0.975))   # [quantile x month x group]
+  groups <- dimnames(pc)$group
+  df <- data.frame(
+    month = rep(seq_len(dim(pc)[2]), times = length(groups)),
+    group = factor(rep(groups, each = dim(pc)[2]), levels = groups),
+    lo    = as.vector(q[1, , ]),
+    med   = as.vector(q[2, , ]),
+    hi    = as.vector(q[3, , ])
+  )
+ 
+  g <- ggplot(df, aes(month)) +
+    geom_hline(yintercept = 0, colour = "#c3c2b7", linewidth = 0.3) +
+    geom_ribbon(aes(ymin = lo, ymax = hi), fill = "#2a78d6", alpha = 0.25) +
+    geom_line(aes(y = med), colour = "#2a78d6", linewidth = 0.5) +
+    facet_wrap(~ group, ncol = 3, scales = "free_y") +
+    scale_x_continuous(breaks = seq(0, 348, 60)) +
+    labs(title    = paste0(Jurisdictions[j], ": monthly population entrants by stratum"),
+         subtitle = paste0("Posterior median (line) and 95% interval (band), ", dim(pc)[1],
+                           " draws. Negative = net exits."),
+         x = "Month (1 = Jan 2017)", y = "People entering per month") +
+    theme_minimal(base_size = 10) +
+    theme(plot.background  = element_rect(fill = "#fcfcfb", colour = NA),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(colour = "#e1e0d9", linewidth = 0.25),
+          strip.text       = element_text(colour = "#0b0b0b", face = "bold", hjust = 0),
+          axis.text        = element_text(colour = "#898781", size = 7),
+          axis.title       = element_text(colour = "#52514e"),
+          plot.title       = element_text(colour = "#0b0b0b", face = "bold"),
+          plot.subtitle    = element_text(colour = "#52514e"))
+  
+  out <- paste0("Calibration/5_Plots/pop_change_entrants_", Jurisdictions[j], ".png")
+  ggsave(out, g, width = 9, height = 16, dpi = 200)
+  cat("Saved", out, "\n")
+  rm(pc); gc()
+}
+
+###############3. Figure - Stacked Number/Proportion #########
+# pop.change sum across White:
+pop.change.W <- apply(calibration_results$pop.change.30[,,gp.gn$white], c(1, 2), sum) # Same across sample & time
+# Pop.change sum across MSM
+pop.change.msm   <- apply(calibration_results$pop.change.30[,,gp.gn$msm], c(1, 2), sum)
+pop.change.mwid  <- apply(calibration_results$pop.change.30[,,gp.gn$mwid], c(1, 2), sum)
+pop.change.pwid.m<- apply(calibration_results$pop.change.30[,,gp.gn$pwid.m], c(1, 2), sum)
+pop.change.het.m <- apply(calibration_results$pop.change.30[,,gp.gn$het.m], c(1, 2), sum)
+pop.change.pwid.f<- apply(calibration_results$pop.change.30[,,gp.gn$pwid.f], c(1, 2), sum)
+pop.change.het.f <- apply(calibration_results$pop.change.30[,,gp.gn$het.f], c(1, 2), sum)
+# Check: pop.change.msm+pop.change.mwid+pop.change.pwid.m+pop.change.het.m +pop.change.pwid.f+pop.change.het.f
+nsamp <- nrow(pop.change.msm)
+nmonth <- ncol(pop.change.msm)
+pop.change <- array(
+  NA_real_,
+  dim = c(nsamp, nmonth, 6),
+  dimnames = list(
+    sample = NULL,
+    month  = colnames(pop.change.msm),
+    group  = c("msm", "mwid", "pwid.m", "het.m", "pwid.f", "het.f")
+  )
+)
+
+pop.change[, , "msm"]    <- pop.change.msm
+pop.change[, , "mwid"]   <- pop.change.mwid
+pop.change[, , "pwid.m"] <- pop.change.pwid.m
+pop.change[, , "het.m"]  <- pop.change.het.m
+pop.change[, , "pwid.f"] <- pop.change.pwid.f
+pop.change[, , "het.f"]  <- pop.change.het.f
+
+plot_strata_ci(pop.change,"het.f") 
+
+
+library(ggplot2)
+
+# median across samples
+med  <- apply(pop.change, c(2, 3), median)
+med <- apply(pop.change, c(2, 3), mean)
+df <- data.frame(
+  month = rep(seq_len(dim(med)[1]), times = dim(med)[2]),
+  group = factor(
+    rep(colnames(med), each = dim(med)[1]),
+    levels = colnames(med)
+  ),
+  median = c(med)
+)
+
+ggplot(df,
+       aes(x = month,
+           y = median,
+           fill = group)) +
+  geom_area(position = "stack") +
+  labs(
+    x = "Month",
+    y = "Population",
+    fill = "Group"
+  ) +
+  theme_bw()
+
+###############4. Calculate the MEAN proportion for pop.change.18 #########
+# Run Prepare Environment from calibration 1 run first with file contains pop.change
+# Create empty object before loop
+all_pop_props <- data.frame()
+
+for (j in seq_along(Jurisdictions)) {
+  
+  message("GEt Pop.change.18.prop ", Jurisdictions[j])
+  
+  ## ---- Load Jurisdiction-specific results ----
+  calibration_results <- readRDS(
+    paste0(
+      "Calibration/3_Results/calib_",
+      dir, "_", Jurisdictions[j], ".rds"
+    )
+  )
+  
+# prop_1:MSM/white
+#      rowSums(calibration_results$pop.change.30[1,,intersect(gp.gn$white,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[1,,])  # values          across t of 1st sample set
+# mean(rowSums(calibration_results$pop.change.30[1,,intersect(gp.gn$white,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[1,,])) # mean (of value) across t of 1st sample set; 1st value of  the next row
+#      rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,])  # mean across 1000 sample sets
+prop_1 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,]))
+# prop_2:MSM/black
+prop_2 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,]))
+# prop_3:MSM/hisp 
+prop_3 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$hisp ,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,]))
+##   mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,]))
+##  +mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,]))
+##  +mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$hisp ,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,])) 
+##  =mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$msm])/rowSums(calibration_results$pop.change.30[ ,,]))
+  
+# prop_4:MSM/PWID/white
+prop_4 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$mwid)])/rowSums(calibration_results$pop.change.30[ ,,]))
+# prop_5:MSM/PWID/black
+prop_5 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$mwid)])/rowSums(calibration_results$pop.change.30[ ,,]))  
+# prop_6:MSM/PWID/hisp
+prop_6 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$hisp ,gp.gn$mwid)])/rowSums(calibration_results$pop.change.30[ ,,]))
+##  =mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$mwid])/rowSums(calibration_results$pop.change.30[ ,,]))  
+  
+# prop_7:PWID/male/white
+prop_7 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$pwid.m)])/rowSums(calibration_results$pop.change.30[ ,,]))
+# prop_8:PWID/male/black
+prop_8 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$pwid.m)])/rowSums(calibration_results$pop.change.30[ ,,]))  
+# prop_9:PWID/male/hisp
+prop_9 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$hisp ,gp.gn$pwid.m)])/rowSums(calibration_results$pop.change.30[ ,,]))  
+  
+# prop_10:Het/male/white
+prop_10 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$het.m)])/rowSums(calibration_results$pop.change.30[ ,,]))
+# prop_11:Het/male/black
+prop_11 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$het.m)])/rowSums(calibration_results$pop.change.30[ ,,]))  
+# prop_12:Het/male/hisp
+prop_12 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$hisp ,gp.gn$het.m)])/rowSums(calibration_results$pop.change.30[ ,,]))  
+## =mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$het.m])/rowSums(calibration_results$pop.change.30[ ,,])) 
+  
+# prop_13:PWID/female/white
+prop_13 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$pwid.f)])/rowSums(calibration_results$pop.change.30[ ,,]))
+# prop_14:PWID/female/black
+prop_14 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$pwid.f)])/rowSums(calibration_results$pop.change.30[ ,,]))  
+# prop_15:PWID/female/hisp
+prop_15 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$hisp ,gp.gn$pwid.f)])/rowSums(calibration_results$pop.change.30[ ,,]))    
+  
+# prop_16:het/female/white
+prop_16 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$white,gp.gn$het.f)])/rowSums(calibration_results$pop.change.30[ ,,]))
+# prop_17:het/female/black
+prop_17 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$het.f)])/rowSums(calibration_results$pop.change.30[ ,,]))  
+# prop_18:het/female/hisp
+prop_18 <- mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$hisp ,gp.gn$het.f)])/rowSums(calibration_results$pop.change.30[ ,,])) 
+
+# Check:  
+# all proportion add up to 1: 1 = mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$msm])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$mwid])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$pwid.m])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$pwid.f])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$het.m])/rowSums(calibration_results$pop.change.30[ ,,])) + (rowSums(calibration_results$pop.change.30[ ,,gp.gn$het.f])/rowSums(calibration_results$pop.change.30[ ,,])) 
+# Add up proportion for male: mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$male])/rowSums(calibration_results$pop.change.30[ ,,])) = mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$msm])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$mwid])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$pwid.m])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$het.m])/rowSums(calibration_results$pop.change.30[ ,,]))
+# Add up proportion for black:mean(rowSums(calibration_results$pop.change.30[ ,,gp.gn$black])/rowSums(calibration_results$pop.change.30[ ,,]))= mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$msm)])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$mwid)])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$pwid.m)])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$het.m)])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$pwid.f)])/rowSums(calibration_results$pop.change.30[ ,,])) + mean(rowSums(calibration_results$pop.change.30[ ,,intersect(gp.gn$black,gp.gn$het.f)])/rowSums(calibration_results$pop.change.30[ ,,]))
+pop.change.18.prop <- c(prop_1,prop_2,prop_3,prop_4,prop_5,prop_6,prop_7,prop_8,prop_9,prop_10,prop_11,prop_12,prop_13,prop_14,prop_15,prop_16,prop_17,prop_18)
+
+
+# add jurisdiction name as first column
+all_pop_props <- rbind(
+  all_pop_props,
+  cbind(
+    Jurisdiction = Jurisdictions[j],
+    as.data.frame(t(pop.change.18.prop))
+  )
+)
+}
+
+# Set column names
+colnames(all_pop_props) <- c(
+  "Jurisdiction",
+  paste0("prop_", 1:18)
+)
+
+# Write to Excel
+library(openxlsx)
+
+write.xlsx(
+  all_pop_props,
+  file = "Calibration/3_Results/pop_change_18_prop.xlsx",
+  rowNames = FALSE
+)

@@ -47,7 +47,7 @@ Jurisdiction_labels <- c(
 
 ################ [Run this] Prepare Environment ###############
 #Step 2: Choosing city
-CITY <- "NJE" # -Pick any random cities, just need to get this running
+CITY <- "DUV" # -Pick any random cities, just need to get this running
 #Read-in save results
 calibration_results_multiple <- readRDS(paste0("Calibration/3_Results/calib_check_2c91081_10-10_MAR.rds")) # Any files in the results
 
@@ -69,14 +69,19 @@ source("Calibration/2_Workflow/util_intervention.R")
 source("Calibration/4_Visualization/plots.R")
 
 ################ CHANGE THIS AS NEEDED ###############
-Jurisdictions <- c("MAR", "SFA")
-# c("MAR", "SAC", "SDI", "TAM","ATL", "MIN", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "MEC", "CUY", "HAM", "SHE", "BEX", "DFW", "TRV", "KIN", "DCM")
+Jurisdictions <- c("SHE")
+# c("MAR","SFA","SAC","MIN","WAY","CLA","MEC","SHE","DFW","HAR","TRV","KIN")
 # all.cities
 # c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "NJE", "MEC", "CUY", "FRA", "HAM", "PHI", "SHE", "BEX", "DFW", "HAR", "TRV", "KIN", "DCM")
 # Seed 5:   c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "NJE", "MEC", "CUY", "FRA", "HAM", "PHI", "SHE", "BEX", "DFW", "HAR", "TRV", "KIN", "DCM")
 # combined: c("MAR", "SFA", "DUV", "TAM", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "NJE", "FRA", "HAM", "PHI", "SHE", "DCM")
 Jurisdiction_names <- Jurisdiction_labels[Jurisdictions]
-dir <- "All2_1111_a79c1a5_20-20"
+dir <- "prop.adj_FALSE_1234_714fdc9_100-100"
+#fix_scen2_reduced-nsg_job4518543_combined_156a386_2000-2000
+#fix_scen2_reduced-h-nsg_job4283360_combined_156a386_2000-2000
+
+#"fix_scen2_five-seed_job3917938_combined_156a386_2000-2000"
+#"fix_scen2_single-seed_job3466780_combined_156a386_10000-5000"
 #"All_10000-5000-jun23"
 #"fix_scen2_top50_ALL_job2134755_combined_156a386_5000-5000"
 
@@ -92,16 +97,17 @@ dir <- "All2_1111_a79c1a5_20-20"
 #"Seed_combined_156a386_2000-2000"
 #"All_10000-5000-jun23"
 dev_obs_vs_target_run <- FALSE
-target_run <- FALSE
+target_run <- TRUE
 ndiag_r_run <- FALSE
 ndiagr_incr_run <- FALSE
 inc_r_run <- TRUE
 IRR_run <- FALSE
-demographic_run <- FALSE
+demographic_run <- TRUE
 combine_pop_run <- FALSE
 combine_inc_ndiag_run <- FALSE
 mcmc_run <- FALSE
-
+prior_vs_post_run <- FALSE
+pop_strata_proj_run <- FALSE
 
 #Step 6:
 
@@ -186,8 +192,8 @@ plot_median_quantile <- function(input_array_model,
 	n_strata <- dim(input_array_model)[3]
 	
 	# QUANTILES — MODEL
-	median_vals_model <- apply(input_array_model, c(2,3), quantile, probs = 0.50)
-	# median_vals_model <- apply(input_array_model, c(2,3), mean)
+	# median_vals_model <- apply(input_array_model, c(2,3), quantile, probs = 0.50)
+	median_vals_model <- apply(input_array_model, c(2,3), mean)
 	lower_vals_model  <- apply(input_array_model, c(2,3), quantile, probs = 0.025) #95% credible lower: 0.025
 	upper_vals_model  <- apply(input_array_model, c(2,3), quantile, probs = 0.975) #95% credible lower: 0.975
 	
@@ -1551,7 +1557,7 @@ legend <- g$grobs[[guide_positions[1]]]
 
 plots_ir <- lapply(plots_ir, function(p) p + labs(y = NULL))
 plots_ir <- lapply(plots_ir, function(p) p + theme(legend.position = "none"))
-combined_plot_ir_clean <- wrap_plots(plots_ir, ncol = 8)#8
+combined_plot_ir_clean <- wrap_plots(plots_ir, ncol = 4)#8
 
 #4 - Combine into 4 × 8 grid with ONE shared legend
 combined_plot_inc <- wrap_plots(plots_inc, ncol = 4) +
@@ -2908,4 +2914,324 @@ ggsave(
   height = 12,
   dpi = 300
 )
+}
+
+################ [Run this] Figure : Prior Vs Posterior(s) ###############
+
+if(prior_vs_post_run){
+  
+  plots_smooth <- vector("list", length(Jurisdictions))
+  plots_bin  <- vector("list", length(Jurisdictions))
+  
+  ## Store plots as a list of rows 
+  row_plots <- list()
+  for (j in seq_along(Jurisdictions)) {
+    message("Processing prior_vs_post plots ", Jurisdictions[j])
+    
+    #Load Jurisdiction-specific results 1:
+    calibration_results_multiple1 <- readRDS(
+      paste0(
+        "Calibration/3_Results/calib_",
+        dir, "_", Jurisdictions[j], ".rds"
+      )
+    )
+    
+    #Load Jurisdiction-specific results 2 (optional):
+    dir2 <- "fix_scen2_top50_ALL_job2134755_combined_156a386_5000-5000"
+    calibration_results_multiple2 <- readRDS(
+      paste0(
+        "Calibration/3_Results/calib_",
+        dir2, "_", Jurisdictions[j], ".rds"
+      )
+    )
+    #Load Jurisdiction-specific prior & info
+# calibration_results_multiple1 <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_top50_ALL_job2134755_combined_156a386_5000-5000_MAR.rds"))
+# calibration_results_multiple2 <- readRDS(paste0("Calibration/3_Results/calib_fix_scen2_single-seed_job3466780_combined_156a386_10000-5000_MAR.rds"))
+    get_calpar_info <- readRDS(paste0("Calibration/3_Results/calib_All_10000-5000-jun23_", Jurisdictions[j], ".rds")) #What ever here is irelevant, just here to get metadata
+    calib_param <- get_calpar_info$calib_param
+    #Re-Run toget meta data
+    param_info <- add_param(names = calib_param, par_info = par_info, WB = WB, CITY = Jurisdictions[j]) # Where Prior is relevant
+    calpar <- param_info$calpar
+    calpar.info <- param_info$calpar.info
+    
+
+    posterior_samples_1 <- calibration_results_multiple1$posterior_samples_combined
+    posterior_samples_2 <- calibration_results_multiple2$posterior_samples_combined
+    prior_samples <- sample_dist_wrapper(5000, calpar)
+
+    
+    # Generate plot
+    g_prior_vs_post <- plot_prior_posterior_comparison_2(
+      prior_samples,
+      posterior_samples_1,
+      posterior_samples_2 = posterior_samples_2,
+      calpar,
+      par_selected = c("nsG","psi"), Jurisdiction_names = "MAR",
+      adjust =10
+    )
+    
+    plots_smooth[[j]] <- g_prior_vs_post$g1
+    plots_bin[[j]]    <- g_prior_vs_post$g2
+#browser()    # Can run descriptive_stats() from here
+  }
+  for (j in seq_along(plots_bin)) {
+    ggsave(
+      filename = paste0(
+        "Calibration/5_Plots/Individual/prio_vs_post_",
+        Jurisdictions[j],
+        ".jpg"
+      ),
+      plot = plots_bin[[j]],
+      width = 8,
+      height = 4,
+      dpi = 300
+    )
+    }
+}
+################ [Run this] Figure : Projected Population by stratas ###############
+
+if(pop_strata_proj_run){
+  # Jurisdictions <- c("MAR", "SFA", "LOR", "SAC", "SDI", "TAM", "BMP")
+  # # c("MAR", "SFA", "LOR", "SAC", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL") 
+  # # c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "ATL") # "SAC", "BMP", "ORF", 
+  # # c("COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "NJE", "MEC") 
+  # # c("COO", "EBR", "ORL", "BAL", "NYC") # "MIN","SUF", "WAY", "CLA", "NJE", "MEC"
+  # # c("CUY", "FRA", "HAM", "PHI", "SHE", "BEX", "DFW", "HAR", "TRV", "KIN", "DCM") 
+  # # all.cities
+  # dir <- "check_156a386_10000-5000-aug26"#"All_10000-5000-jun23"
+  # Jurisdiction_names <- Jurisdiction_labels[Jurisdictions]
+  
+  # plots_inc <- vector("list", length(Jurisdictions))
+  # plots_ir  <- vector("list", length(Jurisdictions))
+  plots_strata_race_all  <- vector("list", length(Jurisdictions))
+  plots_strata_race_PLHIV  <- vector("list", length(Jurisdictions))
+  plots_strataP <- vector("list", length(Jurisdictions)) #Proportion, similar to rate
+  
+  # table <- matrix(NA, nrow = length(Jurisdictions), ncol = 15)
+  # colnames(table) <- c("Median_2017_num","Median_2025_num", "Median_2045_num",
+  #                      "Median_2017_r","Median_2025_r","Median_2045_r",
+  #                      "Median_2017_r_W","Median_2025_r_W","Median_2045_r_W",
+  #                      "Median_2017_r_B","Median_2025_r_B","Median_2045_r_B",
+  #                      "Median_2017_r_H","Median_2025_r_H","Median_2045_r_H")
+  # rownames(table) <- Jurisdiction_names
+  # years_idx <- c(
+  #   "2017 Estimates" = 1,
+  #   "2025 Estimates" = 9,
+  #   "2045 Estimates" = 29
+  # )
+  
+  # compute_inc_total <- function(outa, inc_inds, end_yr_ind, start_yr_ind = 12) {
+  #   
+  #   # Incidence differences
+  #   x_diff <- apply(
+  #     outa[, end_yr_ind, c(17:19) , inc_inds, drop = FALSE], 
+  #     c(1, 3, 4),
+  #     diff
+  #   )    # Outa: sample*time*state*strata; apply diff over time(2) dimension , keep other (1,3,4) same -> x_diff here (before aperm): time*sample*state*strata
+  #   
+  #   x_diff <- aperm(x_diff, c(2, 1, 3, 4)) # x_diff (after aperm): sample*time*state*strata (again)
+  #   
+  #   n_sample  <- dim(x_diff)[1]
+  #   n_state   <- dim(x_diff)[3]
+  #   n_strata  <- dim(x_diff)[4]
+  #   
+  #   # First year
+  #   x0 <- outa[, start_yr_ind, c(17:19) , inc_inds, drop = FALSE]     # x0: sample*time*state*strata, drop = False to maintain dim
+  #   x0 <- array(x0, dim = c(n_sample, 1, n_state, n_strata))
+  #   
+  #   # Full time series
+  #   x_full <- abind(x0, x_diff, along = 2)                  # x_full: sample*time*state*strata, bind along "time" dimension (2)
+  #   
+  #   # Sum over strata + state
+  #   apply(x_full, c(1, 2), sum)	                            # sum over everything while keeping sample (1) & time (2) dimensions
+  #   # browser()
+  # }
+  
+  for (j in seq_along(Jurisdictions)) {
+    
+    message("Processing pop_strata_proj plots ", Jurisdictions[j])
+    
+    #Load Jurisdiction-specific results 
+    calibration_results_multiple <- readRDS(
+      paste0(
+        "Calibration/3_Results/calib_",
+        dir, "_", Jurisdictions[j], ".rds"
+      )
+    )
+    outa <- calibration_results_multiple$outa
+    
+    # Incidence index mapping
+    inc_inds <- c(
+      White = gp.gn$white,
+      Black = gp.gn$black,
+      Hisp  = gp.gn$hisp
+    )
+	
+    # # Compute totals
+    # inc_totals <- lapply(
+    #   inc_inds,
+    #   compute_inc_total,
+    #   outa        = outa,
+    #   end_yr_ind  = end_yr_ind,
+    #   start_yr_ind = 12
+    # )
+    # # Combine 10 W, 10 B, 10 H strata into 1 W, 1B, 1H
+    # inc_totals <- list(
+    #   black = Reduce(`+`, inc_totals[grep("^Black", names(inc_totals))]),
+    #   hisp  = Reduce(`+`, inc_totals[grep("^Hisp",  names(inc_totals))]),
+    #   white = Reduce(`+`, inc_totals[grep("^White", names(inc_totals))])
+    # ) #inc_sum <- Reduce(`+`, inc_totals) -> will give the same value for calculate from sources & races (& risks)
+    # inc_all = inc_totals$white +	inc_totals$black +	inc_totals$hisp
+    # 
+    # inc_array <- abind::abind(inc_totals, along = 3)
+    
+    # # Races
+    # pop_sum_white   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$white],	c(1,2),	sum) # Per Xiao, denominator for inc is All pop
+    # pop_sum_black   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$black],	c(1,2),	sum)
+    # pop_sum_hisp    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$hisp ],	c(1,2),	sum)
+    # pop_sum_all     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16,  ],	c(1,2),	sum)
+    # race_array <- abind::abind(pop_sum_white,pop_sum_black,pop_sum_hisp, along = 3)
+    # 
+    # g_strata_race <- plot_median_quantile(race_array, dashed_year = 2025, strata_labels = c("Black","Hispanic","White/Other"), y_label = "Number of All (Sus +) People", legend_title = "Race/Ethnicity",
+    #                               color_values = c("White/Other" = "#F8766D",	"Black" = "#619CFF","Hispanic" = "#00BA38"	)) + ggtitle(Jurisdiction_names[j])
+    # 
+    # 
+    # # Risks
+    # pop_sum_het_m   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$het.m],	c(1,2),	sum) # Per Xiao, denominator for inc is All pop
+    # pop_sum_het_f   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$het.f],	c(1,2),	sum)
+    # pop_sum_young   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$young ],	c(1,2),	sum)
+    # pop_sum_old     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$old],	c(1,2),	sum)
+    # pop_sum_pwid    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, gp.gn$pwid],	c(1,2),	sum)
+    # risk_array <- abind::abind(pop_sum_het_f,pop_sum_het_m,pop_sum_young,pop_sum_old,pop_sum_pwid, along = 3)
+    # 
+    # g_strata_risk <- plot_median_quantile(risk_array, dashed_year = 2025, strata_labels = c("Female:Het","Male:Het","Male:MSM/MWID 15-34","Male:MSM/MWID 35-64","PWID"), y_label = "Number of All (Sus +) People", legend_title = "Behavior types",
+    #                                       color_values = c("Female:Het"="#F8766D","Male:Het"="#619CFF","Male:MSM/MWID 15-34"="#00BA38", "Male:MSM/MWID 35-64"="#984EA3", "PWID"="#FF7F00")) + ggtitle(Jurisdiction_names[j])
+    # risk_array2 <- abind::abind(pop_sum_young,pop_sum_old,pop_sum_pwid, along = 3)
+    # g_strata_risk2 <- plot_median_quantile(risk_array2, dashed_year = 2025, strata_labels = c("Male:MSM/MWID 15-34","Male:MSM/MWID 35-64","PWID"), y_label = "Number of All (Sus +) People", legend_title = "Behavior types",
+    #                                       color_values = c("Male:MSM/MWID 15-34"="#00BA38", "Male:MSM/MWID 35-64"="#984EA3", "PWID"="#FF7F00")) + ggtitle(Jurisdiction_names[j])
+    
+    
+    # Races & Risks - All
+    pop_sum_young_W   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$young,gp.gn$white)],	c(1,2),	sum)
+    pop_sum_young_B   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$young,gp.gn$black)],	c(1,2),	sum)
+    pop_sum_young_H   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$young,gp.gn$hisp )],	c(1,2),	sum)
+    pop_sum_old_W     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$old,gp.gn$white)],	c(1,2),	sum)
+    pop_sum_old_B     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$old,gp.gn$black)],	c(1,2),	sum)
+    pop_sum_old_H     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$old,gp.gn$hisp )],	c(1,2),	sum)
+    pop_sum_pwid_W    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$pwid,gp.gn$white)],	c(1,2),	sum)
+    pop_sum_pwid_B    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$pwid,gp.gn$black)],	c(1,2),	sum)
+    pop_sum_pwid_H    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 1:16, intersect(gp.gn$pwid,gp.gn$hisp )],	c(1,2),	sum)
+    risk_race_all_array <- abind::abind(pop_sum_young_W ,pop_sum_young_B,pop_sum_young_H,pop_sum_old_W,pop_sum_old_B,pop_sum_old_H,pop_sum_pwid_W,pop_sum_pwid_B,pop_sum_pwid_H, along = 3)
+    g_strata_race_risk_all <- plot_median_quantile(risk_race_all_array , dashed_year = 2025, strata_labels = c("Young-W","Young-B","Young-H","Old-W","Old-B","Old-H","PWID-W","PWID-B","PWID-H"), y_label = "Number of All (Sus +PLHIV) People", legend_title = "Behavior types",
+                                               color_values = c("Young-W" = "#006D5B","Young-B" = "#159D82","Young-H" = "#52BDA5","Old-W" = "#2455A4","Old-B"= "#3679C4","Old-H"= "#6BA6DF", "PWID-W"  = "#B84A00","PWID-B"  = "#E87516","PWID-H" = "#F5A34A")) + ggtitle(Jurisdiction_names[j])
+
+    plots_strata_race_all[[j]] <- g_strata_race_risk_all
+    
+    # Races & Risks - PLHIV
+    pop_sum_young_W   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$young,gp.gn$white)],	c(1,2),	sum)
+    pop_sum_young_B   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$young,gp.gn$black)],	c(1,2),	sum)
+    pop_sum_young_H   <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$young,gp.gn$hisp )],	c(1,2),	sum)
+    pop_sum_old_W     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$old,gp.gn$white)],	c(1,2),	sum)
+    pop_sum_old_B     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$old,gp.gn$black)],	c(1,2),	sum)
+    pop_sum_old_H     <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$old,gp.gn$hisp )],	c(1,2),	sum)
+    pop_sum_pwid_W    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$pwid,gp.gn$white)],	c(1,2),	sum)
+    pop_sum_pwid_B    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$pwid,gp.gn$black)],	c(1,2),	sum)
+    pop_sum_pwid_H    <- apply(	calibration_results_multiple$outa[ , end_yr_ind, 3:16, intersect(gp.gn$pwid,gp.gn$hisp )],	c(1,2),	sum)
+    risk_race_PLHIV_array <- abind::abind(pop_sum_young_W ,pop_sum_young_B,pop_sum_young_H,pop_sum_old_W,pop_sum_old_B,pop_sum_old_H,pop_sum_pwid_W,pop_sum_pwid_B,pop_sum_pwid_H, along = 3)
+    g_strata_race_risk_PLHIV <- plot_median_quantile(risk_race_PLHIV_array , dashed_year = 2025, strata_labels = c("Young-W","Young-B","Young-H","Old-W","Old-B","Old-H","PWID-W","PWID-B","PWID-H"), y_label = "Number of PLHIV People", legend_title = "Behavior types",
+                                                   color_values = c("Young-W" = "#006D5B","Young-B" = "#159D82","Young-H" = "#52BDA5","Old-W" = "#2455A4","Old-B"= "#3679C4","Old-H"= "#6BA6DF", "PWID-W"  = "#B84A00","PWID-B"  = "#E87516","PWID-H" = "#F5A34A")) + ggtitle(Jurisdiction_names[j])
+    
+    plots_strata_race_PLHIV[[j]] <- g_strata_race_risk_PLHIV
+# browser()    
+}
+  # for (j in seq_along(plots_inc)) {
+  #   ggsave(
+  #     filename = paste0(
+  #       "Calibration/5_Plots/Individual/nInc_separate_race_",
+  #       Jurisdictions[j],
+  #       ".jpg"
+  #     ),
+  #     plot = plots_inc[[j]],
+  #     width = 5,
+  #     height = 4,
+  #     dpi = 300
+  #   )
+  # }
+  for (j in seq_along(plots_strata_race_all)) {
+    ggsave(
+      filename = paste0(
+        "Calibration/5_Plots/Individual/nPop_strata_race_all_",
+        Jurisdictions[j],
+        ".jpg"
+      ),
+      plot = plots_strata_race_all[[j]],
+      width = 5,
+      height = 4,
+      dpi = 300
+    )
+  }
+  for (j in seq_along(plots_strata_race_PLHIV)) {
+    ggsave(
+      filename = paste0(
+        "Calibration/5_Plots/Individual/nPop_strata_race_PLHIV_",
+        Jurisdictions[j],
+        ".jpg"
+      ),
+      plot = plots_strata_race_PLHIV[[j]],
+      width = 5,
+      height = 4,
+      dpi = 300
+    )
+  }
+  # Now Remove y-axis from individual plots again to apply a common plots later
+  g <- ggplotGrob(plots_strata_race_all[[1]] +
+                    theme(legend.text = element_text(size = 16),
+                          legend.title = element_text(size = 18))) # Option to change legend size
+  guide_positions <- which(sapply(g$grobs, function(x) x$name == "guide-box"))
+  legend <- g$grobs[[guide_positions[1]]]
+  
+  plots_strata_race_all <- lapply(plots_strata_race_all, function(p) p + labs(y = NULL))
+  plots_strata_race_all <- lapply(plots_strata_race_all, function(p) p + theme(legend.position = "none"))
+  combined_plots_strata_race_all_clean <- wrap_plots(plots_strata_race_all, ncol = 8)#8
+  
+  # Now Remove y-axis from individual plots again to apply a common plots later
+  g <- ggplotGrob(plots_strata_race_PLHIV[[1]] +
+                    theme(legend.text = element_text(size = 16),
+                          legend.title = element_text(size = 18))) # Option to change legend size
+  guide_positions <- which(sapply(g$grobs, function(x) x$name == "guide-box"))
+  legend <- g$grobs[[guide_positions[1]]]
+  
+  plots_strata_race_PLHIV <- lapply(plots_strata_race_PLHIV, function(p) p + labs(y = NULL))
+  plots_strata_race_PLHIV <- lapply(plots_strata_race_PLHIV, function(p) p + theme(legend.position = "none"))
+  combined_plots_strata_race_PLHIV_clean <- wrap_plots(plots_strata_race_PLHIV, ncol = 8)#8
+  
+  #4 - Combine into 4 × 8 grid with ONE shared legend
+  combined_plots_strata_race_all <- ggdraw() +
+    draw_plot(combined_plots_strata_race_all_clean , x = 0.01, y = 0.02, width = 0.98, height = 0.98) +
+    draw_label("Number of ALl population risks & races",
+               x = 0.005  , y = 0.5, angle = 90  , vjust = 0.5) +
+    draw_plot(legend,   x = 0.5, y = 0.01, width = 0.10, height = 0.005)
+  
+  #4 - Combine into 4 × 8 grid with ONE shared legend
+  combined_plots_strata_race_PLHIV <- ggdraw() +
+    draw_plot(combined_plots_strata_race_PLHIV_clean , x = 0.01, y = 0.02, width = 0.98, height = 0.98) +
+    draw_label("Number of PLHIV population risks & races",
+               x = 0.005  , y = 0.5, angle = 90  , vjust = 0.5) +
+    draw_plot(legend,   x = 0.5, y = 0.01, width = 0.10, height = 0.005)
+  
+  #5 - Save combined plot
+  ggsave(
+    filename = "Calibration/5_Plots/nPop_strata_race_all_Jurisdictions.jpg",
+    plot = combined_plots_strata_race_all,
+    width = 24,
+    height = 12,
+    dpi = 300
+  )
+  ggsave(
+    filename = "Calibration/5_Plots/nPop_strata_race_PLHIV_Jurisdictions.jpg",
+    plot = combined_plots_strata_race_PLHIV,
+    width = 24,
+    height = 12,
+    dpi = 300
+  )
 }

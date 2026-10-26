@@ -305,7 +305,7 @@ plot_prior_posterior_comparison <- function(prior_samples, posterior_samples, ca
   colnames_all_samples <- paste0(calpar$par, "_", calpar$gender, "_", calpar$ethnicity, "_",
                                  calpar$risk, "_", calpar$sex.risk.age.group)
   colnames(all_samples) <- c(colnames_all_samples, "type")
-  
+ browser() 
   g1 <- all_samples %>%
     pivot_longer(!type, names_to = "Parameters", values_to = "Value")%>%
     ggplot()+
@@ -327,6 +327,105 @@ plot_prior_posterior_comparison <- function(prior_samples, posterior_samples, ca
   	)
   return(list(g1 = g1, g2 = g2))
 }
+
+
+#' Generate plots comparing prior and posterior distributions
+#' Version 2: Optional parameter selection and comparison of two posteriors
+#'
+#' @param prior_samples Prior samples.
+#' @param posterior_samples_1 First posterior samples.
+#' @param calpar Data frame of free parameters.
+#' @param posterior_samples_2 Optional second posterior samples.
+#' @param par_selected Optional character vector of parameter names from calpar$par.
+#'   If NULL, all parameters are plotted.
+#' @param adjust Controls the smoothness of density plots.
+#'
+#' @return A list containing density plot (g1) and histogram plot (g2).
+#' @export
+
+plot_prior_posterior_comparison_2 <- function(
+    prior_samples, posterior_samples_1, posterior_samples_2 = NULL,
+    calpar, par_selected = NULL, Jurisdiction_names = NULL,
+    adjust = 1) {
+  
+  posterior_samples_1 <- data.frame(posterior_samples_1)
+  posterior_samples_1$type <- "posterior 1"
+  
+  prior_samples <- data.frame(prior_samples)
+  prior_samples$type <- "prior"
+  
+  # Include second posterior only if provided and non-empty
+  if (!is.null(posterior_samples_2) && length(posterior_samples_2) > 0) {
+    posterior_samples_2 <- data.frame(posterior_samples_2)
+    posterior_samples_2$type <- "posterior 2"
+  }
+  
+  # Select parameters to plot
+  if (!is.null(par_selected)) {
+    selected <- calpar$par %in% par_selected
+  
+    # prior_samples <- prior_samples[, selected, drop = FALSE]
+    # posterior_samples_1 <- posterior_samples_1[, selected, drop = FALSE]
+    prior_samples <- prior_samples[, c(which(selected), ncol(prior_samples)), drop = FALSE]
+    posterior_samples_1 <- posterior_samples_1[, c(which(selected), ncol(posterior_samples_1)), drop = FALSE]
+  
+    if (exists("posterior_samples_2")) {
+      # posterior_samples_2 <- posterior_samples_2[, selected, drop = FALSE]
+      posterior_samples_2 <- posterior_samples_2[, c(which(selected), ncol(posterior_samples_2)), drop = FALSE]
+    }
+    
+    calpar <- calpar[selected, , drop = FALSE]
+  }
+  
+  # Combine samples
+  if (exists("posterior_samples_2")) {
+    all_samples <- rbind(
+      prior_samples, posterior_samples_1, posterior_samples_2
+    )
+  } else {
+    all_samples <- rbind(prior_samples, posterior_samples_1)
+  }
+  
+  colnames_all_samples <- paste0(
+    calpar$par, "_", calpar$gender, "_", calpar$ethnicity, "_",
+    calpar$risk, "_", calpar$sex.risk.age.group
+  )
+  
+  colnames(all_samples) <- c(colnames_all_samples, "type")
+ 
+  g1 <- all_samples %>%
+    tidyr::pivot_longer(!type, names_to = "Parameters",
+                        values_to = "Value") %>%
+    ggplot2::ggplot(ggplot2::aes(x = Value, color = type)) +
+    ggplot2::facet_wrap(ggplot2::vars(Parameters), scales = "free") +
+    ggplot2::geom_density(
+      ggplot2::aes(x = Value, color = type), adjust = adjust
+    ) +
+    ggplot2::theme_bw() +
+    # ggplot2::theme(
+    #   strip.text = ggplot2::element_blank(),
+    #   axis.text.x = ggplot2::element_blank()
+    # ) +
+    ggtitle(Jurisdiction_names)
+  
+  g2 <- all_samples %>%
+    tidyr::pivot_longer(!type, names_to = "Parameters",
+                        values_to = "Value") %>%
+    ggplot2::ggplot(ggplot2::aes(x = Value, color = type)) +
+    ggplot2::facet_wrap(ggplot2::vars(Parameters), scales = "free") +
+    ggplot2::geom_histogram(
+      position = "identity", alpha = 0.5, bins = 30
+    ) +
+    ggplot2::theme_bw() +
+    # ggplot2::theme(
+    #   strip.text = ggplot2::element_text(size = 10),
+    #   axis.text.x = ggplot2::element_blank()
+    # ) +
+    ggtitle(Jurisdiction_names)
+  
+  return(list(g1 = g1, g2 = g2))
+}
+
 
 
 #' Plot multichain traceplot for Gibbs within Metropolis-Hasting

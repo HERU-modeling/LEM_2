@@ -8,7 +8,7 @@ library(tictoc)
 # set.seed(1111)
 
 
-Jurisdictions <- c("MAR","SFA", "LOR", "SAC") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
+Jurisdictions <- c("SHE") #"MAR","SFA", "LOR", "SAC", "SDI", "DUV","TAM","BMP", "ORF", "ATL", "COO","MIN", "EBR", "ORL", "BAL", "SUF","WAY", "CLA",  "NYC", "NJE", "MEC","CUY", "FRA", "HAM","PHI","SHE", "BEX","DFW","HAR", "TRV", "KIN", "DCM"
 
 
 for (CITY in Jurisdictions) {
@@ -50,9 +50,9 @@ for (CITY in Jurisdictions) {
 	########################################
 	#Step 5:
 	num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
-	calib_name = "All2"
-	num_mh_iter = 20
-	num_resamples = 20
+	calib_name = "prop.adj_TRUE"
+	num_mh_iter = 100
+	num_resamples = 100
 	git_commit <- system("git rev-parse --short HEAD", intern = TRUE)
 	# git_commit <- "156a386"
 	
@@ -136,6 +136,7 @@ for (CITY in Jurisdictions) {
 	                            target_model = target_result$model,
 	                            target_obs = target_result$obs,
 	                            outa       = target_result$outa,
+	                            pop.change.30 = target_result$pop.change.30, # yearly rate; /12 = monthly entrants [sample x month x group]
 	                            all_samples= combined_results$combined_samples,
 	                            all_lls    = combined_results$combined_lls)
 	

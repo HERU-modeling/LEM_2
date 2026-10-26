@@ -526,6 +526,8 @@ else {pop.change.18.new = pop.change.18}
     dif.het.high  <- (tot.group[low] + tot.group[high]) * as.numeric(prop.high.sus.all[high]) - tot.group[high]
     pop.change.30[high]  <- pop.change.30[high]  + dif.het.high
     pop.change.30[low]   <- pop.change.30[low] - dif.het.high
+    # Log pop.change.30 by month, only when pc.log exists (created in run_model_with_sample, target mode)
+    if (exists("pc.log", envir = globalenv())) pc.log[t + 1, ] <<- pop.change.30
 
 ############################
 # This code session is backbone for the "out" 30*21 result matrix

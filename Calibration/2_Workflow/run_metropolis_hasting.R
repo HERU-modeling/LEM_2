@@ -217,6 +217,7 @@ metropolis_hasting_multichain_combine <- function(calpar, calpar.info, vlist, vp
               target_model = target_result$model,
               target_obs = target_result$obs,
   						outa       = target_result$outa, #Output for diagnostic plot, optional for calibration
+  						pop.change.30 = target_result$pop.change.30, # yearly rate; /12 = monthly entrants [sample x month x group]
   						all_lls  = all_lls,
               all_samples = all_samples,
               burned_lls = burned_lls,

@@ -57,7 +57,7 @@ for (i in 1:18) {
   init.collap[i] <- sum(init[ind, ])
 }
 
-vparameters$prop.adj <- TRUE # Adjust pop change so that 1) respect the input in regards to races , 2) but maintain the proportion of each risk group as close as the initial population
+vparameters$prop.adj <- FALSE # Adjust pop change so that 1) respect the input in regards to races , 2) but maintain the proportion of each risk group as close as the initial population
 vparameters$bal <- TRUE # balance # of sexual partnership between males & females
 ############################
 #pop.change: Pop growth is constant, convert pop.total to pop.change 
@@ -72,7 +72,7 @@ pop.change.6[3] <- (with(vlist$pop.total, pe[ethnicity == "h" & gender == "m" & 
 pop.change.6[4] <- (with(vlist$pop.total, pe[ethnicity == "w" & gender == "f" & year == last.year]) - with(vlist$pop.total, pe[ethnicity == "w" & gender == "f" & year == first.year]))/time
 pop.change.6[5] <- (with(vlist$pop.total, pe[ethnicity == "b" & gender == "f" & year == last.year]) - with(vlist$pop.total, pe[ethnicity == "b" & gender == "f" & year == first.year]))/time
 pop.change.6[6] <- (with(vlist$pop.total, pe[ethnicity == "h" & gender == "f" & year == last.year]) - with(vlist$pop.total, pe[ethnicity == "h" & gender == "f" & year == first.year]))/time
-
+#browser()
 ############################
 # Convert from 6 to 18 stratification: Inspired from model.initial
 vparameters$pop.change.18 <- numeric(length(vparameters$names18))
@@ -112,4 +112,3 @@ for (i in 1:3) {
 	vparameters$pop.change.18[gp18.gn$het.m[i]]    <- pop_het_m
 	vparameters$pop.change.18[gp18.gn$het.f[i]]    <- pop_het_f
 }
-
