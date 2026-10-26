@@ -50,7 +50,7 @@ for (CITY in Jurisdictions) {
 	########################################
 	#Step 5:
 	num_targets = sum(sapply(calib.target, length)) #Reduce hard-code, original 72
-	calib_name = "prop.adj_TRUE"
+	calib_name = "prop.adj_FALSE1"
 	num_mh_iter = 100
 	num_resamples = 100
 	git_commit <- system("git rev-parse --short HEAD", intern = TRUE)

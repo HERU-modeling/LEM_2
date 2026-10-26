@@ -499,7 +499,9 @@ if (prop.adj == TRUE) {
     	)
     }
 }
-else {pop.change.18.new = pop.change.18}    
+else {
+  pop.change.18.new = sum(pop.change.18)*pop.change.18.prop
+}    
     # Create placeholder & new parameter
     pop.change.30 <- numeric(n.gp)
     prop.high.sus.all <- numeric(n.gp)

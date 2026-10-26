@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(scales)
-CITY <- Jurisdictions <- "MAR" # MIA1, NYC1 for original, KIN, BAL, PHI -Pick any random cities, just need to get this running
+CITY <- Jurisdictions <- "SHE" # MIA1, NYC1 for original, KIN, BAL, PHI -Pick any random cities, just need to get this running
 current.int = c("No interventions")
 j = 1
 	

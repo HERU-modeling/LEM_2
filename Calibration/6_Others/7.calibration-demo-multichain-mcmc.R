@@ -449,8 +449,8 @@ plot_strata_ci(
 ## posterior median + 95% interval, one figure per city, 30 panels (3 columns x 10 rows).
 ## Run from the project root.
 
-dir <- "prop.adj_FALSE_1234_714fdc9_500-500"
-Jurisdictions  <- c("MAR")
+dir <- "prop.adj_FALSE1_1234_1775acb_100-100"
+Jurisdictions  <- c("SHE")
 
 for (j in seq_along(Jurisdictions)) {
   calibration_results <- readRDS(
@@ -547,7 +547,7 @@ df <- data.frame(
   ),
   median = c(med)
 )
-
+browser()
 ggplot(df,
        aes(x = month,
            y = median,

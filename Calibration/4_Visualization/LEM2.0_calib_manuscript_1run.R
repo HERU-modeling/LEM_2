@@ -76,7 +76,7 @@ Jurisdictions <- c("SHE")
 # Seed 5:   c("MAR", "SFA", "LOR", "SDI", "DUV", "TAM", "BMP", "ORF", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "CLA", "NYC", "NJE", "MEC", "CUY", "FRA", "HAM", "PHI", "SHE", "BEX", "DFW", "HAR", "TRV", "KIN", "DCM")
 # combined: c("MAR", "SFA", "DUV", "TAM", "ATL", "COO", "MIN", "EBR", "ORL", "BAL", "SUF", "WAY", "NJE", "FRA", "HAM", "PHI", "SHE", "DCM")
 Jurisdiction_names <- Jurisdiction_labels[Jurisdictions]
-dir <- "prop.adj_FALSE_1234_714fdc9_100-100"
+dir <- "prop.adj_FALSE1_1234_1775acb_100-100"
 #fix_scen2_reduced-nsg_job4518543_combined_156a386_2000-2000
 #fix_scen2_reduced-h-nsg_job4283360_combined_156a386_2000-2000
 
@@ -96,7 +96,7 @@ dir <- "prop.adj_FALSE_1234_714fdc9_100-100"
   
 #"Seed_combined_156a386_2000-2000"
 #"All_10000-5000-jun23"
-dev_obs_vs_target_run <- FALSE
+dev_obs_vs_target_run <- TRUE
 target_run <- TRUE
 ndiag_r_run <- FALSE
 ndiagr_incr_run <- FALSE
